@@ -38,6 +38,10 @@
               onclick={() => navigate('compare')}>
         Compare
       </button>
+      <button class:active={page === 'scraper'}
+              onclick={() => navigate('scraper')}>
+        Import
+      </button>
     </nav>
 
     <div class="user-chip">

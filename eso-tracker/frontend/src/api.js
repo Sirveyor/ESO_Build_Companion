@@ -48,4 +48,9 @@ export const api = {
   addSetBonus:    (setId, data)   => req('POST',   `/gear-sets/${setId}/bonuses`, data),
   deleteSetBonus: (setId, bonId)  => req('DELETE', `/gear-sets/${setId}/bonuses/${bonId}`),
   compareGearSets:(ids)           => req('GET',    `/gear-sets/compare?set_ids=${ids.join(',')}`),
+
+  // UESP Scraper
+  scraperSearch:  (q)              => req('GET',    `/scraper/search?q=${encodeURIComponent(q)}`),
+  scraperPreview: (url)            => req('POST',   '/scraper/preview', { url }),
+  scraperImport:  (url, overwrite) => req('POST',   '/scraper/import',  { url, overwrite: overwrite ?? false }),
 }
