@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "ESO Tracker API (uvicorn)",
+            "type": "python",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "main:app",
+                "--reload"
+            ],
+            "jinja": true,
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}/eso-tracker/backend",
+            "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+            "env": {
+                "ESO_DB_PATH": "${workspaceFolder}/eso-tracker/backend/data/eso.db"
+            }
+        }
+    ]
+}

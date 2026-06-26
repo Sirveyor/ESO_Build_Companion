@@ -1,0 +1,57 @@
+{
+  "id": "string",
+  "name": "string",
+  "class": "string",
+  "role": "string",
+  "patch_version": "string",
+  "source_link_id": "string",
+
+  "gear_items": [
+    "string"
+  ],
+
+  "skill_bars": {
+    "front_bar": [
+      "string"
+    ],
+    "front_ultimate": "string",
+
+    "back_bar": [
+      "string"
+    ],
+    "back_ultimate": "string"
+  },
+
+  "champion_points": {
+    "warfare": {
+      "slottables": [
+        "string"
+      ]
+    },
+    "fitness": {
+      "slottables": [
+        "string"
+      ]
+    },
+    "craft": {
+      "slottables": [
+        "string"
+      ]
+    }
+  },
+
+  "notes": "string",
+  "last_updated": "string",
+  "tags": [
+    "string"
+  ],
+  "favorite": "boolean",
+
+  "completion": {
+    "gear": "number",
+    "skills": "number",
+    "cp": "number",
+    "overall": "number",
+    "ready_to_play": "boolean"
+  }
+}

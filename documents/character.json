@@ -1,0 +1,19 @@
+{
+  "id": "string",
+  "name": "string",
+  "class": "string",
+  "race": "string",
+  "role": "string",
+  "level": "number",
+  "champion_points": "number",
+
+  "active_build_id": "string",
+
+  "builds": [
+    "string"
+  ],
+
+  "notes": "string",
+  "last_updated": "string",
+  "custom_portrait": "string"
+}

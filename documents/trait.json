@@ -1,0 +1,8 @@
+{
+  "id": "string",
+  "trait_type": "string",
+  "research_status": "string",
+  "research_end_time": "string",
+  "craftable": "boolean",
+  "notes": "string"
+}

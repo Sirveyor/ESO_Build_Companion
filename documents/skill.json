@@ -1,0 +1,9 @@
+{
+  "id": "string",
+  "name": "string",
+  "skill_line": "string",
+  "morph": "string",
+  "required_level": "number",
+  "obtained": "boolean",
+  "icon": "string"
+}

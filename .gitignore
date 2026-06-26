@@ -1,0 +1,28 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ── Database (runtime data, not source) ───────────────────────────────────────
+eso-tracker/backend/data/*.db
+
+# ── Environment variables (may contain local paths or secrets) ────────────────
+.env
+.env.local
+.env.*.local
+
+# ── Node / Frontend ───────────────────────────────────────────────────────────
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# ── OS metadata ───────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDE task-management state (Qodo) ─────────────────────────────────────────
+.qodo/

@@ -1,0 +1,27 @@
+{
+  "id": "string",
+  "set_name": "string",
+  "slot": "string",
+  "weight": "Light | Medium | Heavy | None",
+  "trait": "string",
+  "quality": "White | Green | Blue | Purple | Gold",
+  "obtained": false,
+  "stickerbook_unlocked": false,
+
+  "location": "string",
+  "source_notes": "string",
+  "craftable": false,
+  "transmute_cost": 50,
+
+  "enchantment": {
+    "type": "string",
+    "level": "string",
+    "quality": "White | Green | Blue | Purple | Gold",
+    "obtained": false,
+    "source": "string"
+  },
+
+  "notes": "string",
+  "last_updated": "2026-05-09T10:44:00Z",
+  "custom_icon": "path/to/icon.png"
+}

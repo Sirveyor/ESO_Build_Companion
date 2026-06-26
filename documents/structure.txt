@@ -1,0 +1,28 @@
+eso-tracker/
+│
+├── backend/
+|   ├──  main.py
+|   ├──  routers/
+|   │   ├── builds.py
+|   │   ├── gear.py
+|   │   ├── skills.py
+|   │   ├── characters.py
+|   │   └── traits.py
+│   |
+|   ├── models/
+|   │   ├── build.py
+|   │   ├── gear_item.py
+|   │   ├── skill.py
+|   │   ├── character.py
+|   │   └── trait.py
+|   │
+|   ├── database.py
+|   └── eso.db
+|
+│
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   └── svelte.config.js
+│
+└── README.md
