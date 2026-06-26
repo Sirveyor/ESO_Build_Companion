@@ -1,89 +1,63 @@
 <script>
-  import svelteLogo from './assets/svelte.svg'
-  import viteLogo from './assets/vite.svg'
-  import heroImg from './assets/hero.png'
-  import Counter from './lib/Counter.svelte'
+  import Nav           from './lib/Nav.svelte'
+  import UserSelect    from './lib/UserSelect.svelte'
+  import CharacterList from './lib/CharacterList.svelte'
+  import BuildList     from './lib/BuildList.svelte'
+  import GearChecklist from './lib/GearChecklist.svelte'
+  import GearSetBrowser from './lib/GearSetBrowser.svelte'
+  import SetComparison  from './lib/SetComparison.svelte'
+
+  // ── Router state ─────────────────────────────────────────────────────────
+  // page: 'home' | 'characters' | 'character' | 'build' | 'gear-sets' | 'compare'
+  let page      = $state('home')
+  let curUser   = $state(null)
+  let curChar   = $state(null)
+  let curBuild  = $state(null)
+
+  function navigate(to, ctx = {}) {
+    page = to
+    if ('user'      in ctx) curUser  = ctx.user
+    if ('character' in ctx) curChar  = ctx.character
+    if ('build'     in ctx) curBuild = ctx.build
+  }
 </script>
 
-<section id="center">
-  <div class="hero">
-    <img src={heroImg} class="base" width="170" height="179" alt="" />
-    <img src={svelteLogo} class="framework" alt="Svelte logo" />
-    <img src={viteLogo} class="vite" alt="Vite logo" />
-  </div>
-  <div>
-    <h1>Get started</h1>
-    <p>Edit <code>src/App.svelte</code> and save to test <code>HMR</code></p>
-  </div>
-  <Counter />
-</section>
+<Nav {page} {curUser} {curChar} {curBuild} {navigate} />
 
-<div class="ticks"></div>
+<main>
+  {#if page === 'home'}
+    <UserSelect
+      onselect={(u) => navigate('characters', { user: u })}
+    />
 
-<section id="next-steps">
-  <div id="docs">
-    <svg class="icon" role="presentation" aria-hidden="true">
-      <use href="/icons.svg#documentation-icon"></use>
-    </svg>
-    <h2>Documentation</h2>
-    <p>Your questions, answered</p>
-    <ul>
-      <li>
-        <a href="https://vite.dev/" target="_blank" rel="noreferrer">
-          <img class="logo" src={viteLogo} alt="" />
-          Explore Vite
-        </a>
-      </li>
-      <li>
-        <a href="https://svelte.dev/" target="_blank" rel="noreferrer">
-          <img class="button-icon" src={svelteLogo} alt="" />
-          Learn more
-        </a>
-      </li>
-    </ul>
-  </div>
-  <div id="social">
-    <svg class="icon" role="presentation" aria-hidden="true">
-      <use href="/icons.svg#social-icon"></use>
-    </svg>
-    <h2>Connect with us</h2>
-    <p>Join the Vite community</p>
-    <ul>
-      <li>
-        <a href="https://github.com/vitejs/vite" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#github-icon"></use>
-          </svg>
-          GitHub
-        </a>
-      </li>
-      <li>
-        <a href="https://chat.vite.dev/" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#discord-icon"></use>
-          </svg>
-          Discord
-        </a>
-      </li>
-      <li>
-        <a href="https://x.com/vite_js" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#x-icon"></use>
-          </svg>
-          X.com
-        </a>
-      </li>
-      <li>
-        <a href="https://bsky.app/profile/vite.dev" target="_blank" rel="noreferrer">
-          <svg class="button-icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#bluesky-icon"></use>
-          </svg>
-          Bluesky
-        </a>
-      </li>
-    </ul>
-  </div>
-</section>
+  {:else if page === 'characters'}
+    <CharacterList
+      user={curUser}
+      onselect={(c) => navigate('character', { character: c })}
+      onback={() => navigate('home')}
+    />
 
-<div class="ticks"></div>
-<section id="spacer"></section>
+  {:else if page === 'character'}
+    <BuildList
+      character={curChar}
+      onselect={(b) => navigate('build', { build: b })}
+      onback={() => navigate('characters')}
+    />
+
+  {:else if page === 'build'}
+    <GearChecklist
+      build={curBuild}
+      onback={() => navigate('character')}
+    />
+
+  {:else if page === 'gear-sets'}
+    <GearSetBrowser />
+
+  {:else if page === 'compare'}
+    <SetComparison />
+  {/if}
+</main>
+
+<style>
+  main { flex: 1; }
+</style>

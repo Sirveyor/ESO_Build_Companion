@@ -2,7 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from dependencies import get_db
 from models.build import Build
-from schemas import BuildSchema
+from models.gear_item import GearItem
+from models.links import BuildGearItem
+from schemas import BuildSchema, GearItemSchema
 
 
 router = APIRouter(prefix="/builds", tags=["Builds"])
@@ -50,6 +52,28 @@ def delete_build(build_id: str, db: Session = Depends(get_db)):
     db.delete(build)
     db.commit()
     return {"detail": "Build deleted"}
+
+
+@router.get("/{build_id}/gear", response_model=list[GearItemSchema])
+def get_build_gear(build_id: str, db: Session = Depends(get_db)):
+    build = db.query(Build).filter(Build.id == build_id).first()
+    if not build:
+        raise HTTPException(status_code=404, detail="Build not found")
+    return build.gear_items
+
+
+@router.post("/{build_id}/gear", response_model=GearItemSchema)
+def add_gear_to_build(build_id: str, gear: GearItemSchema, db: Session = Depends(get_db)):
+    build = db.query(Build).filter(Build.id == build_id).first()
+    if not build:
+        raise HTTPException(status_code=404, detail="Build not found")
+    db_gear = GearItem(**gear.model_dump(exclude={"enchantment"}))
+    db.add(db_gear)
+    db.flush()
+    db.add(BuildGearItem(build_id=build_id, gear_id=db_gear.id))
+    db.commit()
+    db.refresh(db_gear)
+    return db_gear
 
 
 @router.get("/{build_id}/completion")

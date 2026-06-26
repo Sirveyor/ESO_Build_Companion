@@ -1,0 +1,214 @@
+<script>
+  import { api } from '../api.js'
+  import { ESO_CLASSES, ESO_RACES, ESO_ROLES, CLASS_COLORS, ROLE_ICONS } from './constants.js'
+
+  let { user, onselect, onback } = $props()
+
+  let characters = $state([])
+  let loading    = $state(true)
+  let error      = $state('')
+  let showForm   = $state(false)
+  let saving     = $state(false)
+  let editId     = $state(null)
+
+  let form = $state(blankForm())
+
+  function blankForm() {
+    return {
+      name: '', class_name: ESO_CLASSES[0], race: ESO_RACES[0],
+      role: ESO_ROLES[0], level: 50, champion_points: 0, notes: '',
+    }
+  }
+
+  async function load() {
+    try {
+      characters = await api.getCharacters(user.id)
+    } catch (e) {
+      error = e.message
+    } finally {
+      loading = false
+    }
+  }
+
+  async function saveCharacter() {
+    if (!form.name.trim()) return
+    saving = true; error = ''
+    try {
+      const payload = {
+        ...form,
+        name: form.name.trim(),
+        level: Number(form.level) || 50,
+        champion_points: Number(form.champion_points) || 0,
+        user_id: user.id,
+        active_build_id: null,
+        last_updated: new Date().toISOString(),
+        custom_portrait: null,
+      }
+      if (editId) {
+        const updated = await api.updateCharacter(editId, { ...payload, id: editId })
+        characters = characters.map(c => c.id === editId ? updated : c)
+        editId = null
+      } else {
+        const created = await api.createCharacter({ ...payload, id: crypto.randomUUID() })
+        characters = [...characters, created]
+      }
+      form = blankForm(); showForm = false
+    } catch (e) {
+      error = e.message
+    } finally {
+      saving = false
+    }
+  }
+
+  function startEdit(c) {
+    editId = c.id
+    form = {
+      name: c.name, class_name: c.class_name, race: c.race,
+      role: c.role, level: c.level, champion_points: c.champion_points, notes: c.notes || '',
+    }
+    showForm = true
+  }
+
+  async function deleteCharacter(id) {
+    if (!confirm('Delete this character? This cannot be undone.')) return
+    try {
+      await api.deleteCharacter(id)
+      characters = characters.filter(c => c.id !== id)
+    } catch (e) {
+      error = e.message
+    }
+  }
+
+  function cancelForm() {
+    showForm = false; editId = null; form = blankForm(); error = ''
+  }
+
+  load()
+</script>
+
+<div class="page">
+  <div class="flex-between" style="margin-bottom:1.5rem">
+    <div>
+      <button class="btn-ghost back-btn" onclick={onback}>‹ Profiles</button>
+      <h1>{user.display_name || user.name}'s Characters</h1>
+    </div>
+    <button class="btn-primary" onclick={() => { showForm = !showForm; if (!showForm) cancelForm() }}>
+      {showForm && !editId ? 'Cancel' : '+ New Character'}
+    </button>
+  </div>
+
+  {#if error}
+    <div class="notice notice-error">{error}</div>
+  {/if}
+
+  {#if showForm}
+    <div class="inline-form" style="margin-bottom:1.5rem">
+      <h3 style="margin-bottom:.75rem">{editId ? 'Edit Character' : 'New Character'}</h3>
+      <div class="form-grid">
+        <div class="form-row">
+          <label>Name *</label>
+          <input bind:value={form.name} placeholder="Character name" />
+        </div>
+        <div class="form-row">
+          <label>Class</label>
+          <select bind:value={form.class_name}>
+            {#each ESO_CLASSES as c}<option>{c}</option>{/each}
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Race</label>
+          <select bind:value={form.race}>
+            {#each ESO_RACES as r}<option>{r}</option>{/each}
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Role</label>
+          <select bind:value={form.role}>
+            {#each ESO_ROLES as r}<option>{r}</option>{/each}
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Level</label>
+          <input type="number" bind:value={form.level} min="1" max="50" />
+        </div>
+        <div class="form-row">
+          <label>Champion Points</label>
+          <input type="number" bind:value={form.champion_points} min="0" />
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Notes</label>
+        <textarea bind:value={form.notes} placeholder="Optional notes…"></textarea>
+      </div>
+      <div class="flex" style="gap:.5rem">
+        <button class="btn-primary" onclick={saveCharacter} disabled={saving || !form.name.trim()}>
+          {saving ? 'Saving…' : editId ? 'Save Changes' : 'Create Character'}
+        </button>
+        <button class="btn-ghost" onclick={cancelForm}>Cancel</button>
+      </div>
+    </div>
+  {/if}
+
+  {#if loading}
+    <p>Loading characters…</p>
+  {:else if characters.length === 0}
+    <div class="empty">
+      <div class="empty-icon">🧙</div>
+      <h2>No characters yet</h2>
+      <p>Add your first character to start tracking builds.</p>
+    </div>
+  {:else}
+    <div class="grid-2">
+      {#each characters as c (c.id)}
+        <div class="card card-clickable char-card" onclick={() => onselect(c)}>
+          <div class="class-dot" style="background:{CLASS_COLORS[c.class_name] || '#666'}"></div>
+          <div class="char-info">
+            <div class="char-name">{c.name}</div>
+            <div class="char-meta">
+              <span class="badge">{c.class_name}</span>
+              <span class="badge">{ROLE_ICONS[c.role]} {c.role}</span>
+              <span class="badge">{c.race}</span>
+            </div>
+            <div class="char-level">Lv {c.level} · {c.champion_points} CP</div>
+          </div>
+          <div class="char-actions" onclick={(e) => e.stopPropagation()}>
+            <button class="btn-icon" onclick={() => startEdit(c)} title="Edit">✎</button>
+            <button class="btn-icon" onclick={() => deleteCharacter(c.id)} title="Delete">✕</button>
+          </div>
+        </div>
+      {/each}
+    </div>
+  {/if}
+</div>
+
+<style>
+  .back-btn { margin-bottom: .25rem; font-size: .85rem; }
+
+  .char-card {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    position: relative;
+  }
+
+  .class-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: .35rem;
+  }
+
+  .char-info { flex: 1; min-width: 0; }
+  .char-name { font-weight: 600; font-size: 1.05rem; margin-bottom: .35rem; }
+  .char-meta { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: .3rem; }
+  .char-level { font-size: .8rem; color: var(--text-dim); }
+
+  .char-actions {
+    display: flex;
+    gap: .2rem;
+    opacity: 0;
+    transition: opacity .15s;
+  }
+  .char-card:hover .char-actions { opacity: 1; }
+</style>

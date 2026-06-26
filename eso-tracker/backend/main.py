@@ -1,8 +1,18 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from routers import characters, builds, gear, skills, traits, sources, users, gear_sets
 from init_db import init_db
 
 app = FastAPI(title="ESO Build Tracker API", version="0.1.0")
+
+# Allow the Svelte dev server and any LAN device to reach the API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 init_db()
 

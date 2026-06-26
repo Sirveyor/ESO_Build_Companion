@@ -1,0 +1,51 @@
+// Points at port 8000 on whatever host served this page, so LAN devices work automatically.
+const BASE = `http://${window.location.hostname}:8000`
+const HEADERS = { 'Content-Type': 'application/json' }
+
+async function req(method, path, body) {
+  const res = await fetch(`${BASE}${path}`, {
+    method,
+    headers: HEADERS,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: res.statusText }))
+    throw new Error(err.detail || `HTTP ${res.status}`)
+  }
+  return res.status === 204 ? null : res.json()
+}
+
+export const api = {
+  // Users
+  getUsers:    ()         => req('GET',    '/users/'),
+  createUser:  (data)     => req('POST',   '/users/', data),
+  deleteUser:  (id)       => req('DELETE', `/users/${id}`),
+
+  // Characters (pass userId to filter by user)
+  getCharacters:   (userId)       => req('GET',    `/characters/${userId ? `?user_id=${userId}` : ''}`),
+  createCharacter: (data)         => req('POST',   '/characters/', data),
+  updateCharacter: (id, data)     => req('PUT',    `/characters/${id}`, data),
+  deleteCharacter: (id)           => req('DELETE', `/characters/${id}`),
+  setActiveBuild:  (charId, bid)  => req('PUT',    `/characters/${charId}/active_build?build_id=${bid}`),
+
+  // Builds (scoped to a character)
+  getCharacterBuilds: (charId)        => req('GET',    `/characters/${charId}/builds`),
+  createBuild:        (charId, data)  => req('POST',   `/characters/${charId}/builds`, data),
+  updateBuild:        (id, data)      => req('PUT',    `/builds/${id}`, data),
+  deleteBuild:        (id)            => req('DELETE', `/builds/${id}`),
+  getBuildCompletion: (id)            => req('GET',    `/builds/${id}/completion`),
+
+  // Gear (scoped to a build)
+  getBuildGear:       (buildId)        => req('GET',    `/builds/${buildId}/gear`),
+  addGearToBuild:     (buildId, data)  => req('POST',   `/builds/${buildId}/gear`, data),
+  toggleGearObtained: (id)             => req('PUT',    `/gear/${id}/obtained`),
+  deleteGear:         (id)             => req('DELETE', `/gear/${id}`),
+
+  // Gear Sets
+  getGearSets:    ()              => req('GET',    '/gear-sets/'),
+  createGearSet:  (data)          => req('POST',   '/gear-sets/', data),
+  deleteGearSet:  (id)            => req('DELETE', `/gear-sets/${id}`),
+  addSetBonus:    (setId, data)   => req('POST',   `/gear-sets/${setId}/bonuses`, data),
+  deleteSetBonus: (setId, bonId)  => req('DELETE', `/gear-sets/${setId}/bonuses/${bonId}`),
+  compareGearSets:(ids)           => req('GET',    `/gear-sets/compare?set_ids=${ids.join(',')}`),
+}
