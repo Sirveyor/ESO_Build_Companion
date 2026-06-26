@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from typing import Optional
 from sqlalchemy.orm import Session
 from dependencies import get_db
 from models.trait import Trait
@@ -9,8 +10,11 @@ router = APIRouter(prefix="/traits", tags=["Traits"])
 
 
 @router.get("/", response_model=list[TraitSchema])
-def get_traits(db: Session = Depends(get_db)):
-    return db.query(Trait).all()
+def get_traits(character_id: Optional[str] = None, db: Session = Depends(get_db)):
+    q = db.query(Trait)
+    if character_id:
+        q = q.filter(Trait.character_id == character_id)
+    return q.all()
 
 
 @router.post("/", response_model=TraitSchema)

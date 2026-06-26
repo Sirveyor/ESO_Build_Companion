@@ -48,6 +48,7 @@
   {:else if page === 'build'}
     <GearChecklist
       build={curBuild}
+      character={curChar}
       onback={() => navigate('character')}
     />
 

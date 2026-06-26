@@ -15,6 +15,22 @@ import models.build_skills  # noqa: F401
 
 def init_db():
     Base.metadata.create_all(bind=engine)
+    _migrate()
+
+
+def _migrate():
+    """Safe incremental migrations for SQLite (ALTER TABLE ADD COLUMN is idempotent)."""
+    from sqlalchemy import text
+    migrations = [
+        "ALTER TABLE traits ADD COLUMN character_id TEXT REFERENCES characters(id)",
+    ]
+    with engine.connect() as conn:
+        for sql in migrations:
+            try:
+                conn.execute(text(sql))
+                conn.commit()
+            except Exception:
+                pass  # column already exists
 
 
 if __name__ == "__main__":

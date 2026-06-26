@@ -113,9 +113,26 @@ class SkillSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class BuildSkillAssignmentSchema(BaseModel):
+    skill: SkillSchema
+    bar: str
+    position: int
+    is_ultimate: Optional[int] = None
+
+
+class ChampionPointsSchema(BaseModel):
+    build_id: str
+    warfare: Optional[str] = None
+    fitness: Optional[str] = None
+    craft: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class TraitSchema(BaseModel):
     id: str
     trait_type: str
+    character_id: Optional[str] = None
     research_status: Optional[str] = None
     research_end_time: Optional[str] = None
     craftable: Optional[int] = None

@@ -49,6 +49,27 @@ export const api = {
   deleteSetBonus: (setId, bonId)  => req('DELETE', `/gear-sets/${setId}/bonuses/${bonId}`),
   compareGearSets:(ids)           => req('GET',    `/gear-sets/compare?set_ids=${ids.join(',')}`),
 
+  // Build skills
+  getBuildSkills:    (buildId)              => req('GET',    `/builds/${buildId}/skills`),
+  setBuildSkill:     (buildId, data)        => req('POST',   `/builds/${buildId}/skills`, data),
+  clearSkillSlot:    (buildId, bar, pos)    => req('DELETE', `/builds/${buildId}/skills/${bar}/${pos}`),
+  toggleSkillObtained: (skillId)           => req('PUT',    `/skills/${skillId}/obtained`),
+
+  // Champion Points
+  getBuildCP:  (buildId)       => req('GET', `/builds/${buildId}/champion-points`),
+  saveBuildCP: (buildId, data) => req('PUT', `/builds/${buildId}/champion-points`, data),
+
+  // Traits (per character)
+  getTraits:   (characterId)  => req('GET',    `/traits/${characterId ? `?character_id=${characterId}` : ''}`),
+  createTrait: (data)         => req('POST',   '/traits/', data),
+  deleteTrait: (id)           => req('DELETE', `/traits/${id}`),
+  startTraitResearch: (id, endTime) =>
+    req('PUT', `/traits/${id}/research?research_end_time=${encodeURIComponent(endTime)}`),
+  completeTrait: (id) => req('PUT', `/traits/${id}/complete`),
+
+  // Build duplicate
+  duplicateBuild: (buildId) => req('POST', `/builds/${buildId}/duplicate`),
+
   // UESP Scraper
   scraperSearch:  (q)              => req('GET',    `/scraper/search?q=${encodeURIComponent(q)}`),
   scraperPreview: (url)            => req('POST',   '/scraper/preview', { url }),

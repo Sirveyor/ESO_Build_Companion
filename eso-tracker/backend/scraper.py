@@ -79,11 +79,17 @@ async def scrape_set(url: str) -> dict:
     # Use separator=" " so adjacent inline elements keep their spaces
     intro = first_p.get_text(separator=" ", strip=True).lower() if first_p else ""
 
+    # Check intro text, then fall back to URL path for hints
     set_type = None
     for pattern, stype in _SET_TYPE_PATTERNS:
         if re.search(pattern, intro, re.IGNORECASE):
             set_type = stype
             break
+    if not set_type:
+        for pattern, stype in _SET_TYPE_PATTERNS:
+            if re.search(pattern, url, re.IGNORECASE):
+                set_type = stype
+                break
 
     location = None
     loc_match = re.search(
@@ -128,6 +134,10 @@ async def scrape_set(url: str) -> dict:
                     })
 
     num_pieces = max((b["pieces_required"] for b in bonuses), default=5)
+
+    # Mythic items have exactly 1 piece and a single bonus — infer type if still unknown
+    if not set_type and num_pieces == 1 and len(bonuses) == 1:
+        set_type = "mythic"
 
     return {
         "name": name,

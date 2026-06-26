@@ -88,6 +88,16 @@
     }
   }
 
+  async function duplicateBuild(b) {
+    try {
+      const copy = await api.duplicateBuild(b.id)
+      builds = [...builds, copy]
+      completions = { ...completions, [copy.id]: { total_pieces: 0, obtained: 0, percent: 0 } }
+    } catch (e) {
+      error = e.message
+    }
+  }
+
   function cancelForm() { showForm = false; editId = null; form = blankForm(); error = '' }
 
   load()
@@ -193,6 +203,7 @@
           </div>
           <div class="build-actions" onclick={(e) => e.stopPropagation()}>
             <button class="btn-icon" onclick={() => startEdit(b)} title="Edit">✎</button>
+            <button class="btn-icon" onclick={() => duplicateBuild(b)} title="Duplicate">⧉</button>
             <button class="btn-icon" onclick={() => deleteBuild(b.id)} title="Delete">✕</button>
           </div>
         </div>
