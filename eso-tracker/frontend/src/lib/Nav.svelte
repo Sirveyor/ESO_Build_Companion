@@ -1,5 +1,12 @@
 <script>
+  import { api } from '../api.js'
+
   let { page, curUser, curChar, curBuild, navigate } = $props()
+
+  let version = $state('')
+  $effect(() => {
+    api.getVersion().then(d => version = d.version).catch(() => {})
+  })
 
   let crumbs = $derived.by(() => {
     if (page === 'home')       return []
@@ -22,6 +29,7 @@
        onclick={() => navigate('home')}
        onkeydown={(e) => e.key === 'Enter' && navigate('home')}>
     ⚔ ESO Build Companion
+    {#if version}<span class="version">v{version}</span>{/if}
   </div>
 
   {#if curUser}
@@ -93,6 +101,7 @@
     flex-shrink: 0;
   }
   .brand:hover { opacity: .8; }
+  .version { font-size: .65rem; font-weight: 400; color: var(--text-dim); margin-left: .35rem; vertical-align: middle; }
 
   nav { display: flex; gap: .25rem; flex: 1; }
 

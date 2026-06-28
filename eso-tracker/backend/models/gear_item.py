@@ -25,7 +25,8 @@ class GearItem(Base):
     custom_icon = Column(String)
 
     gear_set = relationship("GearSet", back_populates="gear_items")
-    enchantment = relationship("Enchantment", uselist=False, back_populates="gear")
+    enchantment = relationship("Enchantment", uselist=False, back_populates="gear",
+                               cascade="all, delete-orphan")
 
 
 class Enchantment(Base):

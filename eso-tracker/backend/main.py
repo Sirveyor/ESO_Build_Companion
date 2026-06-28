@@ -1,7 +1,10 @@
+from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routers import characters, builds, gear, skills, traits, sources, users, gear_sets, scraper
 from init_db import init_db
+
+_VERSION_FILE = Path(__file__).parent.parent / "VERSION"
 
 app = FastAPI(title="ESO Build Tracker API", version="0.1.0")
 
@@ -15,6 +18,13 @@ app.add_middleware(
 )
 
 init_db()
+
+@app.get("/version")
+def get_version():
+    try:
+        return {"version": _VERSION_FILE.read_text().strip()}
+    except FileNotFoundError:
+        return {"version": "unknown"}
 
 app.include_router(users.router)
 app.include_router(characters.router)

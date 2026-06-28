@@ -22,6 +22,7 @@ export const GEAR_SLOTS = [
   'Head', 'Chest', 'Shoulders', 'Hands', 'Waist', 'Legs', 'Feet',
   'Neck', 'Ring 1', 'Ring 2',
   'Main Hand', 'Off Hand',
+  'Main Hand Backup', 'Off Hand Backup',
 ]
 
 export const GEAR_WEIGHTS = ['Light', 'Medium', 'Heavy', 'Jewelry', 'Weapon']
@@ -40,6 +41,55 @@ export const GEAR_TRAITS = [
 
 export const GEAR_QUALITY = [
   'Normal', 'Fine', 'Superior', 'Epic', 'Legendary',
+]
+
+export const ARMOR_GLYPHS = [
+  'Glyph of Max Health',
+  'Glyph of Max Magicka',
+  'Glyph of Max Stamina',
+  'Glyph of Physical Resistance',
+  'Glyph of Spell Resistance',
+  'Glyph of Prismatic Defense',
+]
+
+export const WEAPON_GLYPHS = [
+  'Glyph of Fire',
+  'Glyph of Frost',
+  'Glyph of Shock',
+  'Glyph of Poison',
+  'Glyph of Foulness',
+  'Glyph of Absorb Health',
+  'Glyph of Absorb Magicka',
+  'Glyph of Absorb Stamina',
+  'Glyph of Weapon Damage',
+  'Glyph of Hardening',
+  'Glyph of Weakening',
+  'Glyph of Crushing',
+  'Glyph of Decrease Health',
+  'Glyph of Prismatic Onslaught',
+]
+
+export const JEWELRY_GLYPHS = [
+  'Glyph of Increase Physical Harm',
+  'Glyph of Increase Magical Harm',
+  'Glyph of Health Recovery',
+  'Glyph of Magicka Recovery',
+  'Glyph of Stamina Recovery',
+  'Glyph of Reduce Spell Cost',
+  'Glyph of Reduce Feat Cost',
+  'Glyph of Shielding',
+  'Glyph of Bashing',
+  'Glyph of Decrease Physical Harm',
+  'Glyph of Decrease Spell Harm',
+  'Glyph of Flame Resist',
+  'Glyph of Frost Resist',
+  'Glyph of Shock Resist',
+  'Glyph of Poison Resist',
+  'Glyph of Disease Resist',
+  'Glyph of Potion Resist',
+  'Glyph of Potion Boost',
+  'Glyph of Reduce Skill Cost',
+  'Glyph of Prismatic Recovery',
 ]
 
 export const SET_TYPES = [

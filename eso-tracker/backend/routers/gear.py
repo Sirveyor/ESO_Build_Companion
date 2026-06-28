@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from dependencies import get_db
 from models.gear_item import Enchantment, GearItem
+from models.links import BuildGearItem
 from schemas import GearItemSchema, EnchantmentSchema
 
 
@@ -48,6 +49,7 @@ def delete_gear(gear_id: str, db: Session = Depends(get_db)):
     item = db.query(GearItem).filter(GearItem.id == gear_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Gear item not found")
+    db.query(BuildGearItem).filter(BuildGearItem.gear_id == gear_id).delete()
     db.delete(item)
     db.commit()
     return {"detail": "Gear item deleted"}
@@ -61,6 +63,16 @@ def toggle_gear_obtained(gear_id: str, db: Session = Depends(get_db)):
     item.obtained = 0 if item.obtained else 1
     db.commit()
     return {"obtained": item.obtained}
+
+
+@router.put("/{gear_id}/stickerbook")
+def toggle_gear_stickerbook(gear_id: str, db: Session = Depends(get_db)):
+    item = db.query(GearItem).filter(GearItem.id == gear_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Gear item not found")
+    item.stickerbook_unlocked = 0 if item.stickerbook_unlocked else 1
+    db.commit()
+    return {"stickerbook_unlocked": item.stickerbook_unlocked}
 
 
 @router.put("/{gear_id}/enchantment", response_model=EnchantmentSchema)

@@ -16,6 +16,9 @@ async function req(method, path, body) {
 }
 
 export const api = {
+  // App version
+  getVersion: () => req('GET', '/version'),
+
   // Users
   getUsers:    ()         => req('GET',    '/users/'),
   createUser:  (data)     => req('POST',   '/users/', data),
@@ -38,7 +41,9 @@ export const api = {
   // Gear (scoped to a build)
   getBuildGear:       (buildId)        => req('GET',    `/builds/${buildId}/gear`),
   addGearToBuild:     (buildId, data)  => req('POST',   `/builds/${buildId}/gear`, data),
-  toggleGearObtained: (id)             => req('PUT',    `/gear/${id}/obtained`),
+  toggleGearObtained:    (id)        => req('PUT', `/gear/${id}/obtained`),
+  toggleGearStickerbook: (id)        => req('PUT', `/gear/${id}/stickerbook`),
+  updateGearEnchantment: (id, data)  => req('PUT', `/gear/${id}/enchantment`, data),
   deleteGear:         (id)             => req('DELETE', `/gear/${id}`),
 
   // Gear Sets

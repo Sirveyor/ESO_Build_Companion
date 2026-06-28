@@ -1,6 +1,7 @@
 <script>
   import { api } from '../api.js'
-  import { GEAR_SLOTS, GEAR_WEIGHTS, GEAR_TRAITS, GEAR_QUALITY } from './constants.js'
+  import { GEAR_SLOTS, GEAR_WEIGHTS, GEAR_TRAITS, GEAR_QUALITY,
+           ARMOR_GLYPHS, WEAPON_GLYPHS, JEWELRY_GLYPHS } from './constants.js'
   import SkillBar             from './SkillBar.svelte'
   import TraitTracker         from './TraitTracker.svelte'
   import ChampionPointsEditor from './ChampionPointsEditor.svelte'
@@ -97,6 +98,13 @@
   async function toggleStickerbook(item) {
     const next = item.stickerbook_unlocked ? 0 : 1
     gear = gear.map(g => g.id === item.id ? { ...g, stickerbook_unlocked: next } : g)
+    try {
+      await api.toggleGearStickerbook(item.id)
+    } catch (e) {
+      // rollback optimistic update
+      gear = gear.map(g => g.id === item.id ? { ...g, stickerbook_unlocked: item.stickerbook_unlocked } : g)
+      error = e.message
+    }
   }
 
   async function deleteGear(id) {
@@ -105,6 +113,50 @@
       gear = gear.filter(g => g.id !== id)
     } catch (e) {
       error = e.message
+    }
+  }
+
+  // ── Enchantment editing ───────────────────────────────────────────────────
+  let editEnchant = $state(null)
+  let enchantForm = $state({ type: '', quality: GEAR_QUALITY[3], obtained: false, source: '' })
+  let savingEnch  = $state(false)
+
+  const JEWELRY_SLOTS = new Set(['Neck', 'Ring 1', 'Ring 2'])
+  const WEAPON_SLOTS  = new Set(['Main Hand', 'Off Hand', 'Main Hand Backup', 'Off Hand Backup'])
+
+  function glyphSuggestions(slot) {
+    if (JEWELRY_SLOTS.has(slot)) return JEWELRY_GLYPHS
+    if (WEAPON_SLOTS.has(slot))  return WEAPON_GLYPHS
+    return ARMOR_GLYPHS
+  }
+
+  function openEnchantEdit(item) {
+    enchantForm = {
+      type:     item.enchantment?.type    ?? '',
+      quality:  item.enchantment?.quality ?? GEAR_QUALITY[3],
+      obtained: !!(item.enchantment?.obtained),
+      source:   item.enchantment?.source  ?? '',
+    }
+    editEnchant = item.id
+  }
+
+  async function saveEnchantment(item) {
+    savingEnch = true
+    try {
+      const updated = await api.updateGearEnchantment(item.id, {
+        gear_id:  item.id,
+        type:     enchantForm.type    || null,
+        quality:  enchantForm.quality || null,
+        obtained: enchantForm.obtained ? 1 : 0,
+        source:   enchantForm.source  || null,
+        level:    null,
+      })
+      gear = gear.map(g => g.id === item.id ? { ...g, enchantment: updated } : g)
+      editEnchant = null
+    } catch (e) {
+      error = e.message
+    } finally {
+      savingEnch = false
     }
   }
 
@@ -235,6 +287,7 @@
                     <th>Weight</th>
                     <th>Trait</th>
                     <th>Quality</th>
+                    <th>Enchant</th>
                     <th>Notes</th>
                     <th title="Obtained">Got</th>
                     <th title="Stickerbook unlocked">SB</th>
@@ -253,6 +306,18 @@
                               class:badge-blue={item.quality === 'Epic'}>
                           {item.quality || '—'}
                         </span>
+                      </td>
+                      <td>
+                        {#if item.enchantment?.type}
+                          <button class="enchant-btn" onclick={() => openEnchantEdit(item)}>
+                            <span class="enchant-name">{item.enchantment.type}</span>
+                            {#if item.enchantment.obtained}
+                              <span class="enchant-got">✓</span>
+                            {/if}
+                          </button>
+                        {:else}
+                          <button class="btn-ghost enchant-add" onclick={() => openEnchantEdit(item)}>+ Glyph</button>
+                        {/if}
                       </td>
                       <td style="color:var(--text-dim);font-size:.8rem">{item.source_notes || ''}</td>
                       <td>
@@ -274,6 +339,41 @@
                         <button class="btn-icon" onclick={() => deleteGear(item.id)} title="Remove">✕</button>
                       </td>
                     </tr>
+                    {#if editEnchant === item.id}
+                      <tr class="enchant-edit-row">
+                        <td colspan="9">
+                          <div class="enchant-form">
+                            <input class="enchant-type-input"
+                                   list="glyphs-{item.id}"
+                                   bind:value={enchantForm.type}
+                                   placeholder="Glyph type…" />
+                            <datalist id="glyphs-{item.id}">
+                              {#each glyphSuggestions(item.slot) as g}
+                                <option value={g}></option>
+                              {/each}
+                            </datalist>
+                            <select bind:value={enchantForm.quality} style="width:auto">
+                              {#each GEAR_QUALITY as q}<option>{q}</option>{/each}
+                            </select>
+                            <button class="check-wrap enchant-got-btn"
+                                    onclick={() => enchantForm.obtained = !enchantForm.obtained}
+                                    title={enchantForm.obtained ? 'Have glyph' : 'Need glyph'}>
+                              <span class="check-box" class:checked={enchantForm.obtained}></span>
+                              <span class="enchant-got-label">Got it</span>
+                            </button>
+                            <input bind:value={enchantForm.source}
+                                   placeholder="Source / notes…"
+                                   style="flex:1;min-width:80px" />
+                            <button class="btn-primary" style="padding:.25rem .75rem;flex-shrink:0"
+                                    onclick={() => saveEnchantment(item)} disabled={savingEnch}>
+                              {savingEnch ? '…' : 'Save'}
+                            </button>
+                            <button class="btn-ghost" style="padding:.25rem .75rem;flex-shrink:0"
+                                    onclick={() => editEnchant = null}>Cancel</button>
+                          </div>
+                        </td>
+                      </tr>
+                    {/if}
                   {/each}
                 </tbody>
               </table>
@@ -334,10 +434,29 @@
   .set-name { font-weight: 600; font-size: 1rem; }
   .set-count { font-size: .75rem; }
 
-  tr.obtained td:not(:last-child):not(:nth-last-child(2)):not(:nth-last-child(3)) {
+  tr.obtained td:not(:last-child):not(:nth-last-child(2)):not(:nth-last-child(3)):not(:nth-last-child(5)) {
     opacity: .45;
     text-decoration: line-through;
   }
+
+  /* Enchantment column */
+  .enchant-btn {
+    background: none; border: none; padding: 0; text-align: left; cursor: pointer;
+    color: var(--gold); display: flex; align-items: center; gap: .25rem; font-size: .8rem;
+  }
+  .enchant-btn:hover { opacity: .75; }
+  .enchant-name {
+    max-width: 110px; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; display: block;
+  }
+  .enchant-got { color: var(--green); font-size: .7rem; flex-shrink: 0; }
+  .enchant-add { font-size: .72rem; padding: .1rem .35rem; color: var(--text-dim); }
+
+  .enchant-edit-row td { padding: .4rem .75rem; background: var(--surface-2); border-top: none; }
+  .enchant-form { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
+  .enchant-type-input { width: 180px; }
+  .enchant-got-btn { display: flex; align-items: center; gap: .3rem; }
+  .enchant-got-label { font-size: .8rem; color: var(--text-dim); white-space: nowrap; }
 
   button.check-wrap {
     background: transparent;

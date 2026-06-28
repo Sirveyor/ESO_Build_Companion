@@ -3,7 +3,7 @@
 
   let { build } = $props()
 
-  let cp      = $state({ build_id: build.id, warfare: '', fitness: '', craft: '' })
+  let cp      = $state({ build_id: '', warfare: '', fitness: '', craft: '' })
   let loading = $state(true)
   let saving  = $state(false)
   let saved   = $state(false)
