@@ -18,6 +18,7 @@ def init_db():
     Base.metadata.create_all(bind=engine)
     _migrate()
     _seed_reference()
+    _seed_gear_sets()
 
 
 def _migrate():
@@ -154,6 +155,39 @@ def _seed_reference():
         for s in stones:
             db.add(RefMundusStone(id=s[0], name=s[1], effect=s[2], stat_type=s[3], location=s[4]))
 
+        db.commit()
+
+
+def _seed_gear_sets():
+    """Populate gear_sets and set_bonuses from static ESO data. Skips sets that already exist."""
+    from sqlalchemy.orm import Session
+    from models.gear_set import GearSet, SetBonus
+    from seed_gear_sets import GEAR_SETS
+    import re
+
+    def _slug(name):
+        return re.sub(r'[^a-z0-9]+', '-', name.lower()).strip('-')
+
+    with Session(engine) as db:
+        for (name, set_type, location, num_pieces, bonuses) in GEAR_SETS:
+            if db.query(GearSet).filter_by(name=name).first():
+                continue
+            set_id = f"seed-{_slug(name)}"
+            db.add(GearSet(
+                id=set_id,
+                name=name,
+                set_type=set_type,
+                location=location,
+                num_pieces=num_pieces,
+                notes="Seeded from ESO game data",
+            ))
+            for i, (pieces_required, bonus_description) in enumerate(bonuses):
+                db.add(SetBonus(
+                    id=f"{set_id}-b{i}",
+                    set_id=set_id,
+                    pieces_required=pieces_required,
+                    bonus_description=bonus_description,
+                ))
         db.commit()
 
 
