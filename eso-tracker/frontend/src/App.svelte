@@ -6,10 +6,11 @@
   import GearChecklist from './lib/GearChecklist.svelte'
   import GearSetBrowser from './lib/GearSetBrowser.svelte'
   import SetComparison  from './lib/SetComparison.svelte'
-  import Scraper        from './lib/Scraper.svelte'
+  import Scraper          from './lib/Scraper.svelte'
+  import ReferenceLibrary from './lib/ReferenceLibrary.svelte'
 
   // ── Router state ─────────────────────────────────────────────────────────
-  // page: 'home' | 'characters' | 'character' | 'build' | 'gear-sets' | 'compare' | 'scraper'
+  // page: 'home' | 'characters' | 'character' | 'build' | 'gear-sets' | 'compare' | 'scraper' | 'reference'
   let page      = $state('home')
   let curUser   = $state(null)
   let curChar   = $state(null)
@@ -60,6 +61,9 @@
 
   {:else if page === 'scraper'}
     <Scraper />
+
+  {:else if page === 'reference'}
+    <ReferenceLibrary />
   {/if}
 </main>
 
