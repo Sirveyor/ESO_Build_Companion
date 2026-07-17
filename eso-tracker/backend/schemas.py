@@ -183,6 +183,17 @@ class RefSkillLineSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class RefSkillSchema(BaseModel):
+    id: str
+    skill_line_id: str
+    name: str
+    morph_1: Optional[str] = None
+    morph_2: Optional[str] = None
+    is_ultimate: Optional[int] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class SourceLinkSchema(BaseModel):
     id: str
     url: str

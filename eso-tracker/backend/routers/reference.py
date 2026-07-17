@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from dependencies import get_db
-from models.reference import RefEnchantment, RefTrait, RefMundusStone, RefSkillLine
-from schemas import RefEnchantmentSchema, RefTraitSchema, RefMundusStoneSchema, RefSkillLineSchema
+from models.reference import RefEnchantment, RefTrait, RefMundusStone, RefSkillLine, RefSkill
+from schemas import RefEnchantmentSchema, RefTraitSchema, RefMundusStoneSchema, RefSkillLineSchema, RefSkillSchema
 
 router = APIRouter(prefix="/reference", tags=["Reference"])
 
@@ -38,3 +38,11 @@ def get_ref_skill_lines(category: str = None, class_name: str = None, db: Sessio
             (RefSkillLine.class_name == class_name) | (RefSkillLine.class_name == None)  # noqa: E711
         )
     return q.order_by(RefSkillLine.category, RefSkillLine.name).all()
+
+
+@router.get("/skills", response_model=list[RefSkillSchema])
+def get_ref_skills(skill_line_id: str = None, db: Session = Depends(get_db)):
+    q = db.query(RefSkill)
+    if skill_line_id:
+        q = q.filter(RefSkill.skill_line_id == skill_line_id)
+    return q.order_by(RefSkill.is_ultimate, RefSkill.name).all()

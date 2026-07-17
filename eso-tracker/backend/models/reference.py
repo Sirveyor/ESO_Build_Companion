@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Text
+from sqlalchemy import Column, Integer, String, Text
 from database import Base
 
 
@@ -40,3 +40,13 @@ class RefSkillLine(Base):
     category   = Column(String, nullable=False)
     # Populated only for Class lines (e.g. "Dragonknight")
     class_name = Column(String)
+
+
+class RefSkill(Base):
+    __tablename__ = "ref_skills"
+    id            = Column(String, primary_key=True)
+    skill_line_id = Column(String, nullable=False)  # FK to ref_skill_lines.id
+    name          = Column(String, nullable=False)   # base skill name
+    morph_1       = Column(String)                   # first morph option
+    morph_2       = Column(String)                   # second morph option
+    is_ultimate   = Column(Integer, default=0)

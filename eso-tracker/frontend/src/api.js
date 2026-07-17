@@ -80,7 +80,8 @@ export const api = {
   getRefEnchantments: (slotType)  => req('GET', `/reference/enchantments${slotType ? `?slot_type=${slotType}` : ''}`),
   getRefTraits:       (slotType)  => req('GET', `/reference/traits${slotType ? `?slot_type=${slotType}` : ''}`),
   getRefMundusStones: ()          => req('GET', '/reference/mundus-stones'),
-  getRefSkillLines:   (className) => req('GET', `/reference/skill-lines${className ? `?class_name=${encodeURIComponent(className)}` : ''}`),
+  getRefSkillLines:   (className)    => req('GET', `/reference/skill-lines${className ? `?class_name=${encodeURIComponent(className)}` : ''}`),
+  getRefSkills:       (skillLineId)  => req('GET', `/reference/skills${skillLineId  ? `?skill_line_id=${encodeURIComponent(skillLineId)}` : ''}`),
 
   // UESP Scraper
   scraperSearch:  (q)              => req('GET',    `/scraper/search?q=${encodeURIComponent(q)}`),

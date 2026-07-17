@@ -15,16 +15,29 @@
     return { name: '', skill_line: '', morph: '', obtained: false }
   }
 
-  // ── Skill line reference data ─────────────────────────────────────────────
-  let skillLines = $state([])
+  // ── Skill line + skill reference data ────────────────────────────────────
+  let skillLines    = $state([])
+  let skillsForLine = $state([])
 
   async function loadSkillLines() {
     try {
-      // Pass class_name so the API returns only this class's class lines + all shared lines
-      const className = build?.class_name?.split(' ')[0]  // "Dragonknight", "Sorcerer", etc.
-      skillLines = await api.getRefSkillLines(className)
+      skillLines = await api.getRefSkillLines(build?.class_name ?? null)
     } catch (e) { /* non-fatal */ }
   }
+
+  // When the skill_line field changes to a known line, fetch its skills
+  $effect(() => {
+    const line = skillLines.find(sl => sl.name === form.skill_line)
+    if (!line) { skillsForLine = []; return }
+    api.getRefSkills(line.id).then(s => { skillsForLine = s }).catch(() => {})
+  })
+
+  // Morph options for the currently typed skill name
+  let morphOptions = $derived.by(() => {
+    const sk = skillsForLine.find(s => s.name === form.name)
+    if (!sk) return []
+    return [sk.morph_1, sk.morph_2].filter(Boolean)
+  })
 
   async function load() {
     try {
@@ -174,10 +187,6 @@
         </h3>
         <div class="form-grid">
           <div class="form-row">
-            <label>Skill Name *</label>
-            <input bind:value={form.name} placeholder="e.g. Elemental Blockade" />
-          </div>
-          <div class="form-row">
             <label>Skill Line</label>
             <input bind:value={form.skill_line} list="skill-line-list" placeholder="e.g. Destruction Staff" />
             <datalist id="skill-line-list">
@@ -185,8 +194,18 @@
             </datalist>
           </div>
           <div class="form-row">
+            <label>Skill Name *</label>
+            <input bind:value={form.name} list="skill-name-list" placeholder="e.g. Wall of Elements" />
+            <datalist id="skill-name-list">
+              {#each skillsForLine as s}<option value={s.name}></option>{/each}
+            </datalist>
+          </div>
+          <div class="form-row">
             <label>Morph / Variant</label>
-            <input bind:value={form.morph} placeholder="e.g. Unstable Wall of Elements" />
+            <input bind:value={form.morph} list="skill-morph-list" placeholder="e.g. Elemental Blockade" />
+            <datalist id="skill-morph-list">
+              {#each morphOptions as m}<option value={m}></option>{/each}
+            </datalist>
           </div>
           <div class="form-row" style="align-items:center">
             <label>Obtained</label>

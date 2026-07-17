@@ -20,6 +20,7 @@ def init_db():
     _seed_reference()
     _seed_gear_sets()
     _seed_skill_lines()
+    _seed_skills()
 
 
 def _migrate():
@@ -203,6 +204,23 @@ def _seed_skill_lines():
             return
         for (id_, name, category, class_name) in SKILL_LINES:
             db.add(RefSkillLine(id=id_, name=name, category=category, class_name=class_name))
+        db.commit()
+
+
+def _seed_skills():
+    """Populate ref_skills on first run. Skips if already seeded."""
+    from sqlalchemy.orm import Session
+    from models.reference import RefSkill
+    from seed_skills import SKILLS
+
+    with Session(engine) as db:
+        if db.query(RefSkill).count() > 0:
+            return
+        for (id_, line_id, name, morph_1, morph_2, is_ult) in SKILLS:
+            db.add(RefSkill(
+                id=id_, skill_line_id=line_id, name=name,
+                morph_1=morph_1, morph_2=morph_2, is_ultimate=is_ult,
+            ))
         db.commit()
 
 
