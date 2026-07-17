@@ -19,6 +19,7 @@ class CharacterSchema(BaseModel):
     role: str
     level: int
     champion_points: int
+    alliance: Optional[str] = None
     user_id: Optional[str] = None
     active_build_id: Optional[str] = None
     notes: Optional[str] = None

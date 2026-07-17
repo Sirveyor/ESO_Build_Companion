@@ -18,6 +18,18 @@ export const ESO_ROLES = [
   'Tank', 'Healer', 'Stamina DPS', 'Magicka DPS', 'Support',
 ]
 
+export const ESO_ALLIANCES = [
+  'Aldmeri Dominion',
+  'Daggerfall Covenant',
+  'Ebonheart Pact',
+]
+
+export const ALLIANCE_COLORS = {
+  'Aldmeri Dominion':   '#c9a84c',
+  'Daggerfall Covenant': '#4a72c4',
+  'Ebonheart Pact':     '#c44a4a',
+}
+
 export const GEAR_SLOTS = [
   'Head', 'Chest', 'Shoulders', 'Hands', 'Waist', 'Legs', 'Feet',
   'Neck', 'Ring 1', 'Ring 2',

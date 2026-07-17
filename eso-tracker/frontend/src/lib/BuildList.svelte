@@ -1,6 +1,6 @@
 <script>
   import { api } from '../api.js'
-  import { ESO_CLASSES, ESO_ROLES, ROLE_ICONS } from './constants.js'
+  import { ESO_CLASSES, ESO_ROLES, ROLE_ICONS, ALLIANCE_COLORS } from './constants.js'
 
   let { character, onselect, onback } = $props()
 
@@ -112,6 +112,12 @@
         <span class="badge">{character.class_name}</span>
         <span class="badge">{ROLE_ICONS[character.role]} {character.role}</span>
         <span class="badge">{character.race}</span>
+        {#if character.alliance}
+          <span class="badge"
+                style="border-color:{ALLIANCE_COLORS[character.alliance]};color:{ALLIANCE_COLORS[character.alliance]}">
+            {character.alliance}
+          </span>
+        {/if}
         <span style="color:var(--text-dim);font-size:.85rem">Lv {character.level} · {character.champion_points} CP</span>
       </div>
     </div>

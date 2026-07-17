@@ -23,6 +23,7 @@ def _migrate():
     from sqlalchemy import text
     migrations = [
         "ALTER TABLE traits ADD COLUMN character_id TEXT REFERENCES characters(id)",
+        "ALTER TABLE characters ADD COLUMN alliance TEXT",
     ]
     with engine.connect() as conn:
         for sql in migrations:

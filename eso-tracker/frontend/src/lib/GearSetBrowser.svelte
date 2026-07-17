@@ -27,7 +27,7 @@
       const q = search.trim().toLowerCase()
       list = list.filter(s => s.name.toLowerCase().includes(q) || (s.location || '').toLowerCase().includes(q))
     }
-    return list.sort((a, b) => a.name.localeCompare(b.name))
+    return [...list].sort((a, b) => a.name.localeCompare(b.name))
   })
 
   async function load() {

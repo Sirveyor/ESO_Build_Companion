@@ -16,6 +16,7 @@ class Character(Base):
 
     user_id = Column(String, ForeignKey("users.id"), nullable=True)
     active_build_id = Column(String, ForeignKey("builds.id"))
+    alliance = Column(String, nullable=True)
     notes = Column(Text)
     last_updated = Column(String)
     custom_portrait = Column(String)

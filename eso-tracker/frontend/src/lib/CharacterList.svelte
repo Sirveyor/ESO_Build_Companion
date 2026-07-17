@@ -1,6 +1,6 @@
 <script>
   import { api } from '../api.js'
-  import { ESO_CLASSES, ESO_RACES, ESO_ROLES, CLASS_COLORS, ROLE_ICONS } from './constants.js'
+  import { ESO_CLASSES, ESO_RACES, ESO_ROLES, ESO_ALLIANCES, ALLIANCE_COLORS, CLASS_COLORS, ROLE_ICONS } from './constants.js'
 
   let { user, onselect, onback } = $props()
 
@@ -16,7 +16,7 @@
   function blankForm() {
     return {
       name: '', class_name: ESO_CLASSES[0], race: ESO_RACES[0],
-      role: ESO_ROLES[0], level: 50, champion_points: 0, notes: '',
+      role: ESO_ROLES[0], alliance: ESO_ALLIANCES[0], level: 50, champion_points: 0, notes: '',
     }
   }
 
@@ -39,6 +39,7 @@
         name: form.name.trim(),
         level: Number(form.level) || 50,
         champion_points: Number(form.champion_points) || 0,
+        alliance: form.alliance || null,
         user_id: user.id,
         active_build_id: null,
         last_updated: new Date().toISOString(),
@@ -64,7 +65,8 @@
     editId = c.id
     form = {
       name: c.name, class_name: c.class_name, race: c.race,
-      role: c.role, level: c.level, champion_points: c.champion_points, notes: c.notes || '',
+      role: c.role, alliance: c.alliance || ESO_ALLIANCES[0],
+      level: c.level, champion_points: c.champion_points, notes: c.notes || '',
     }
     showForm = true
   }
@@ -128,6 +130,12 @@
           </select>
         </div>
         <div class="form-row">
+          <label>Alliance</label>
+          <select bind:value={form.alliance}>
+            {#each ESO_ALLIANCES as a}<option>{a}</option>{/each}
+          </select>
+        </div>
+        <div class="form-row">
           <label>Level</label>
           <input type="number" bind:value={form.level} min="1" max="50" />
         </div>
@@ -168,6 +176,12 @@
               <span class="badge">{c.class_name}</span>
               <span class="badge">{ROLE_ICONS[c.role]} {c.role}</span>
               <span class="badge">{c.race}</span>
+              {#if c.alliance}
+                <span class="badge alliance-badge"
+                      style="border-color:{ALLIANCE_COLORS[c.alliance]};color:{ALLIANCE_COLORS[c.alliance]}">
+                  {c.alliance}
+                </span>
+              {/if}
             </div>
             <div class="char-level">Lv {c.level} · {c.champion_points} CP</div>
           </div>

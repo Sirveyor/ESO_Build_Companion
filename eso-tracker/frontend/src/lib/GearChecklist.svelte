@@ -116,6 +116,47 @@
     }
   }
 
+  // ── Gear item editing ─────────────────────────────────────────────────────
+  let editGear     = $state(null)
+  let editGearForm = $state({ set_name: '', slot: GEAR_SLOTS[0], weight: GEAR_WEIGHTS[0], trait: GEAR_TRAITS[0], quality: GEAR_QUALITY[3], notes: '' })
+  let savingEdit   = $state(false)
+
+  function openGearEdit(item) {
+    editGearForm = {
+      set_name: item.set_name,
+      slot:     item.slot,
+      weight:   item.weight   || GEAR_WEIGHTS[0],
+      trait:    item.trait    || GEAR_TRAITS[0],
+      quality:  item.quality  || GEAR_QUALITY[3],
+      notes:    item.source_notes || '',
+    }
+    editGear    = item.id
+    editEnchant = null
+  }
+
+  async function saveGearEdit(item) {
+    if (!editGearForm.set_name.trim()) return
+    savingEdit = true; error = ''
+    try {
+      const updated = await api.updateGear(item.id, {
+        ...item,
+        set_name:     editGearForm.set_name.trim(),
+        slot:         editGearForm.slot,
+        weight:       editGearForm.weight,
+        trait:        editGearForm.trait,
+        quality:      editGearForm.quality,
+        source_notes: editGearForm.notes || null,
+        last_updated: new Date().toISOString(),
+      })
+      gear    = gear.map(g => g.id === item.id ? { ...updated, enchantment: item.enchantment } : g)
+      editGear = null
+    } catch (e) {
+      error = e.message
+    } finally {
+      savingEdit = false
+    }
+  }
+
   // ── Enchantment editing ───────────────────────────────────────────────────
   let editEnchant = $state(null)
   let enchantForm = $state({ type: '', quality: GEAR_QUALITY[3], obtained: false, source: '' })
@@ -138,6 +179,7 @@
       source:   item.enchantment?.source  ?? '',
     }
     editEnchant = item.id
+    editGear    = null
   }
 
   async function saveEnchantment(item) {
@@ -335,10 +377,62 @@
                           <span class="check-box sb-box" class:checked={item.stickerbook_unlocked}></span>
                         </button>
                       </td>
-                      <td>
+                      <td class="actions-cell">
+                        <button class="btn-icon" onclick={() => openGearEdit(item)} title="Edit">✎</button>
                         <button class="btn-icon" onclick={() => deleteGear(item.id)} title="Remove">✕</button>
                       </td>
                     </tr>
+                    {#if editGear === item.id}
+                      <tr class="gear-edit-row">
+                        <td colspan="9">
+                          <div class="gear-edit-form">
+                            <div class="form-grid gear-edit-grid">
+                              <div class="form-row">
+                                <label>Set Name *</label>
+                                <input bind:value={editGearForm.set_name} />
+                              </div>
+                              <div class="form-row">
+                                <label>Slot</label>
+                                <select bind:value={editGearForm.slot}>
+                                  {#each GEAR_SLOTS as s}<option>{s}</option>{/each}
+                                </select>
+                              </div>
+                              <div class="form-row">
+                                <label>Weight / Type</label>
+                                <select bind:value={editGearForm.weight}>
+                                  {#each GEAR_WEIGHTS as w}<option>{w}</option>{/each}
+                                </select>
+                              </div>
+                              <div class="form-row">
+                                <label>Trait</label>
+                                <select bind:value={editGearForm.trait}>
+                                  {#each GEAR_TRAITS as t}<option>{t}</option>{/each}
+                                </select>
+                              </div>
+                              <div class="form-row">
+                                <label>Quality</label>
+                                <select bind:value={editGearForm.quality}>
+                                  {#each GEAR_QUALITY as q}<option>{q}</option>{/each}
+                                </select>
+                              </div>
+                              <div class="form-row">
+                                <label>Notes / Where to get</label>
+                                <input bind:value={editGearForm.notes} placeholder="e.g. Deshaan overland" />
+                              </div>
+                            </div>
+                            <div class="flex" style="gap:.4rem;margin-top:.5rem">
+                              <button class="btn-primary" style="padding:.25rem .75rem;flex-shrink:0"
+                                      onclick={() => saveGearEdit(item)}
+                                      disabled={savingEdit || !editGearForm.set_name.trim()}>
+                                {savingEdit ? '…' : 'Save'}
+                              </button>
+                              <button class="btn-ghost" style="padding:.25rem .75rem;flex-shrink:0"
+                                      onclick={() => editGear = null}>Cancel</button>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    {/if}
                     {#if editEnchant === item.id}
                       <tr class="enchant-edit-row">
                         <td colspan="9">
@@ -451,6 +545,12 @@
   }
   .enchant-got { color: var(--green); font-size: .7rem; flex-shrink: 0; }
   .enchant-add { font-size: .72rem; padding: .1rem .35rem; color: var(--text-dim); }
+
+  .actions-cell { white-space: nowrap; }
+
+  .gear-edit-row td { padding: .6rem .75rem; background: var(--surface-2); border-top: none; }
+  .gear-edit-form { }
+  .gear-edit-grid { grid-template-columns: 1fr 1fr 1fr; }
 
   .enchant-edit-row td { padding: .4rem .75rem; background: var(--surface-2); border-top: none; }
   .enchant-form { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
