@@ -142,6 +142,38 @@ class TraitSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class RefEnchantmentSchema(BaseModel):
+    id: str
+    name: str
+    slot_type: str
+    effect: Optional[str] = None
+    essence_rune: Optional[str] = None
+    notes: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RefTraitSchema(BaseModel):
+    id: str
+    name: str
+    slot_type: str
+    effect: Optional[str] = None
+    trait_material: Optional[str] = None
+    notes: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RefMundusStoneSchema(BaseModel):
+    id: str
+    name: str
+    effect: Optional[str] = None
+    stat_type: Optional[str] = None
+    location: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class SourceLinkSchema(BaseModel):
     id: str
     url: str

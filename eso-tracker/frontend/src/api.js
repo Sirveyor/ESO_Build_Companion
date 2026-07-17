@@ -76,6 +76,11 @@ export const api = {
   // Build duplicate
   duplicateBuild: (buildId) => req('POST', `/builds/${buildId}/duplicate`),
 
+  // Reference data (read-only game data)
+  getRefEnchantments: (slotType) => req('GET', `/reference/enchantments${slotType ? `?slot_type=${slotType}` : ''}`),
+  getRefTraits:       (slotType) => req('GET', `/reference/traits${slotType ? `?slot_type=${slotType}` : ''}`),
+  getRefMundusStones: ()         => req('GET', '/reference/mundus-stones'),
+
   // UESP Scraper
   scraperSearch:  (q)              => req('GET',    `/scraper/search?q=${encodeURIComponent(q)}`),
   scraperPreview: (url)            => req('POST',   '/scraper/preview', { url }),

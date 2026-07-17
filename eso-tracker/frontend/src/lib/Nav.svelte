@@ -50,6 +50,10 @@
               onclick={() => navigate('scraper')}>
         Import
       </button>
+      <button class:active={page === 'reference'}
+              onclick={() => navigate('reference')}>
+        Reference
+      </button>
     </nav>
 
     <div class="user-chip">
