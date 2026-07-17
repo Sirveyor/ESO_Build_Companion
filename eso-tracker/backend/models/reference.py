@@ -2,6 +2,7 @@ from sqlalchemy import Column, String, Text
 from database import Base
 
 
+
 class RefEnchantment(Base):
     __tablename__ = "ref_enchantments"
     id           = Column(String, primary_key=True)
@@ -29,3 +30,13 @@ class RefMundusStone(Base):
     effect    = Column(Text)
     stat_type = Column(String)
     location  = Column(Text)
+
+
+class RefSkillLine(Base):
+    __tablename__ = "ref_skill_lines"
+    id         = Column(String, primary_key=True)
+    name       = Column(String, nullable=False)
+    # Class | Weapon | Armor | Guild | Alliance War | World | Racial | Craft
+    category   = Column(String, nullable=False)
+    # Populated only for Class lines (e.g. "Dragonknight")
+    class_name = Column(String)

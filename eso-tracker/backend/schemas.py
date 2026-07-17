@@ -174,6 +174,15 @@ class RefMundusStoneSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class RefSkillLineSchema(BaseModel):
+    id: str
+    name: str
+    category: str
+    class_name: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class SourceLinkSchema(BaseModel):
     id: str
     url: str

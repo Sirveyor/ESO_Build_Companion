@@ -15,6 +15,17 @@
     return { name: '', skill_line: '', morph: '', obtained: false }
   }
 
+  // ── Skill line reference data ─────────────────────────────────────────────
+  let skillLines = $state([])
+
+  async function loadSkillLines() {
+    try {
+      // Pass class_name so the API returns only this class's class lines + all shared lines
+      const className = build?.class_name?.split(' ')[0]  // "Dragonknight", "Sorcerer", etc.
+      skillLines = await api.getRefSkillLines(className)
+    } catch (e) { /* non-fatal */ }
+  }
+
   async function load() {
     try {
       const assignments = await api.getBuildSkills(build.id)
@@ -104,6 +115,7 @@
   }
 
   load()
+  loadSkillLines()
 </script>
 
 <div class="skill-section">
@@ -167,7 +179,10 @@
           </div>
           <div class="form-row">
             <label>Skill Line</label>
-            <input bind:value={form.skill_line} placeholder="e.g. Destruction Staff" />
+            <input bind:value={form.skill_line} list="skill-line-list" placeholder="e.g. Destruction Staff" />
+            <datalist id="skill-line-list">
+              {#each skillLines as sl}<option value={sl.name}></option>{/each}
+            </datalist>
           </div>
           <div class="form-row">
             <label>Morph / Variant</label>

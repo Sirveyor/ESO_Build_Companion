@@ -165,11 +165,59 @@
   const JEWELRY_SLOTS = new Set(['Neck', 'Ring 1', 'Ring 2'])
   const WEAPON_SLOTS  = new Set(['Main Hand', 'Off Hand', 'Main Hand Backup', 'Off Hand Backup'])
 
+  function slotType(slot) {
+    if (JEWELRY_SLOTS.has(slot)) return 'Jewelry'
+    if (WEAPON_SLOTS.has(slot))  return 'Weapon'
+    return 'Armor'
+  }
+
+  // ── Reference data for dropdowns ─────────────────────────────────────────
+  let allGearSets    = $state([])
+  let refEnchantList = $state([])
+  let refTraitList   = $state([])
+
+  async function loadRefData() {
+    try {
+      const [sets, enchs, traits] = await Promise.all([
+        api.getGearSets(),
+        api.getRefEnchantments(),
+        api.getRefTraits(),
+      ])
+      allGearSets    = sets
+      refEnchantList = enchs
+      refTraitList   = traits
+    } catch (e) { /* non-fatal; forms fall back to static constants */ }
+  }
+
   function glyphSuggestions(slot) {
+    const st = slotType(slot)
+    const filtered = refEnchantList.filter(e => e.slot_type === st)
+    if (filtered.length) return filtered.map(e => e.name)
     if (JEWELRY_SLOTS.has(slot)) return JEWELRY_GLYPHS
     if (WEAPON_SLOTS.has(slot))  return WEAPON_GLYPHS
     return ARMOR_GLYPHS
   }
+
+  let addTraitOptions = $derived.by(() => {
+    const filtered = refTraitList.filter(t => t.slot_type === slotType(form.slot))
+    return filtered.length ? filtered.map(t => t.name) : GEAR_TRAITS
+  })
+
+  let editTraitOptions = $derived.by(() => {
+    const filtered = refTraitList.filter(t => t.slot_type === slotType(editGearForm.slot))
+    return filtered.length ? filtered.map(t => t.name) : GEAR_TRAITS
+  })
+
+  // Auto-fill "where to get" from the matched gear set's location
+  $effect(() => {
+    const match = allGearSets.find(s => s.name.toLowerCase() === form.set_name.toLowerCase())
+    if (match?.location && !form.notes) form.notes = match.location
+  })
+
+  $effect(() => {
+    const match = allGearSets.find(s => s.name.toLowerCase() === editGearForm.set_name.toLowerCase())
+    if (match?.location && !editGearForm.notes) editGearForm.notes = match.location
+  })
 
   function openEnchantEdit(item) {
     enchantForm = {
@@ -203,6 +251,7 @@
   }
 
   loadGear()
+  loadRefData()
 </script>
 
 <div class="page">
@@ -233,6 +282,10 @@
 
   <!-- ── GEAR TAB ─────────────────────────────────────────────────────────── -->
   {#if activeTab === 'gear'}
+    <datalist id="gear-set-names">
+      {#each allGearSets as s}<option value={s.name}></option>{/each}
+    </datalist>
+
     {#if totalPieces > 0}
       <div class="card summary-card">
         <div class="summary-top flex-between">
@@ -257,7 +310,7 @@
         <div class="form-grid">
           <div class="form-row">
             <label>Set Name *</label>
-            <input bind:value={form.set_name} placeholder="e.g. Mother's Sorrow" />
+            <input bind:value={form.set_name} list="gear-set-names" placeholder="e.g. Mother's Sorrow" />
           </div>
           <div class="form-row">
             <label>Slot</label>
@@ -274,7 +327,7 @@
           <div class="form-row">
             <label>Trait</label>
             <select bind:value={form.trait}>
-              {#each GEAR_TRAITS as t}<option>{t}</option>{/each}
+              {#each addTraitOptions as t}<option>{t}</option>{/each}
             </select>
           </div>
           <div class="form-row">
@@ -389,7 +442,7 @@
                             <div class="form-grid gear-edit-grid">
                               <div class="form-row">
                                 <label>Set Name *</label>
-                                <input bind:value={editGearForm.set_name} />
+                                <input bind:value={editGearForm.set_name} list="gear-set-names" />
                               </div>
                               <div class="form-row">
                                 <label>Slot</label>
@@ -406,7 +459,7 @@
                               <div class="form-row">
                                 <label>Trait</label>
                                 <select bind:value={editGearForm.trait}>
-                                  {#each GEAR_TRAITS as t}<option>{t}</option>{/each}
+                                  {#each editTraitOptions as t}<option>{t}</option>{/each}
                                 </select>
                               </div>
                               <div class="form-row">

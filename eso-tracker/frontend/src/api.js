@@ -77,9 +77,10 @@ export const api = {
   duplicateBuild: (buildId) => req('POST', `/builds/${buildId}/duplicate`),
 
   // Reference data (read-only game data)
-  getRefEnchantments: (slotType) => req('GET', `/reference/enchantments${slotType ? `?slot_type=${slotType}` : ''}`),
-  getRefTraits:       (slotType) => req('GET', `/reference/traits${slotType ? `?slot_type=${slotType}` : ''}`),
-  getRefMundusStones: ()         => req('GET', '/reference/mundus-stones'),
+  getRefEnchantments: (slotType)  => req('GET', `/reference/enchantments${slotType ? `?slot_type=${slotType}` : ''}`),
+  getRefTraits:       (slotType)  => req('GET', `/reference/traits${slotType ? `?slot_type=${slotType}` : ''}`),
+  getRefMundusStones: ()          => req('GET', '/reference/mundus-stones'),
+  getRefSkillLines:   (className) => req('GET', `/reference/skill-lines${className ? `?class_name=${encodeURIComponent(className)}` : ''}`),
 
   // UESP Scraper
   scraperSearch:  (q)              => req('GET',    `/scraper/search?q=${encodeURIComponent(q)}`),
