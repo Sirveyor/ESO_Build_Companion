@@ -7,10 +7,11 @@
   const STATUS_LABEL = { unknown: 'Unknown', in_progress: 'Researching', complete: 'Complete' }
   const STATUS_CLASS = { unknown: '', in_progress: 'badge-blue', complete: 'badge-green' }
 
-  // Trait categories for quick-fill suggestions
-  const ARMOR_TRAITS   = ['Divines', 'Infused', 'Impenetrable', 'Reinforced', 'Well-Fitted', 'Sturdy', 'Training', 'Exploration', 'Nirnhoned']
-  const WEAPON_TRAITS  = ['Powered', 'Charged', 'Precise', 'Infused', 'Defending', 'Training', 'Sharpened', 'Weighted', 'Nirnhoned']
-  const JEWELRY_TRAITS = ['Arcane', 'Healthy', 'Robust', 'Infused', 'Bloodthirsty', 'Harmony', 'Protective', 'Swift', 'Triune']
+  let refResearchTraits = $state([])
+
+  async function loadRefTraits() {
+    try { refResearchTraits = await api.getRefResearchTraits() } catch (e) { /* non-fatal */ }
+  }
 
   let traits   = $state([])
   let loading  = $state(true)
@@ -107,6 +108,7 @@
   }
 
   load()
+  loadRefTraits()
 </script>
 
 <div class="trait-section">
@@ -132,9 +134,7 @@
           <input bind:value={form.trait_type}
                  placeholder="e.g. Heavy Armor Head — Divines" list="trait-suggestions" />
           <datalist id="trait-suggestions">
-            {#each ARMOR_TRAITS as t}<option value="Armor — {t}"></option>{/each}
-            {#each WEAPON_TRAITS as t}<option value="Weapon — {t}"></option>{/each}
-            {#each JEWELRY_TRAITS as t}<option value="Jewelry — {t}"></option>{/each}
+            {#each refResearchTraits as rt}<option value="{rt.item_type} — {rt.trait_name}"></option>{/each}
           </datalist>
         </div>
         <div class="form-row">

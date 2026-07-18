@@ -194,6 +194,15 @@ class RefSkillSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class RefResearchTraitSchema(BaseModel):
+    id: str
+    item_type: str
+    trait_name: str
+    slot_category: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class SourceLinkSchema(BaseModel):
     id: str
     url: str

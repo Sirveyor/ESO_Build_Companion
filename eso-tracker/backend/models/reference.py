@@ -50,3 +50,11 @@ class RefSkill(Base):
     morph_1       = Column(String)                   # first morph option
     morph_2       = Column(String)                   # second morph option
     is_ultimate   = Column(Integer, default=0)
+
+
+class RefResearchTrait(Base):
+    __tablename__ = "ref_research_traits"
+    id            = Column(String, primary_key=True)
+    item_type     = Column(String, nullable=False)   # e.g. "Heavy Head", "Sword", "Necklace"
+    trait_name    = Column(String, nullable=False)   # e.g. "Divines", "Powered", "Arcane"
+    slot_category = Column(String, nullable=False)   # Armor | Weapon | Jewelry

@@ -21,6 +21,7 @@ def init_db():
     _seed_gear_sets()
     _seed_skill_lines()
     _seed_skills()
+    _seed_research_traits()
 
 
 def _migrate():
@@ -220,6 +221,25 @@ def _seed_skills():
             db.add(RefSkill(
                 id=id_, skill_line_id=line_id, name=name,
                 morph_1=morph_1, morph_2=morph_2, is_ultimate=is_ult,
+            ))
+        db.commit()
+
+
+def _seed_research_traits():
+    """Populate ref_research_traits with all ESO researchable item/trait combinations. Skips if already seeded."""
+    from sqlalchemy.orm import Session
+    from models.reference import RefResearchTrait
+    from seed_research_traits import RESEARCH_TRAITS
+
+    with Session(engine) as db:
+        if db.query(RefResearchTrait).count() > 0:
+            return
+        for (id_, item_type, trait_name, slot_category) in RESEARCH_TRAITS:
+            db.add(RefResearchTrait(
+                id=id_,
+                item_type=item_type,
+                trait_name=trait_name,
+                slot_category=slot_category,
             ))
         db.commit()
 
