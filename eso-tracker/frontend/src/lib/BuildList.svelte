@@ -4,13 +4,14 @@
 
   let { character, onselect, onback } = $props()
 
-  let builds      = $state([])
-  let completions = $state({})
-  let loading     = $state(true)
-  let error       = $state('')
-  let showForm    = $state(false)
-  let saving      = $state(false)
-  let editId      = $state(null)
+  let builds       = $state([])
+  let completions  = $state({})
+  let loading      = $state(true)
+  let error        = $state('')
+  let showForm     = $state(false)
+  let saving       = $state(false)
+  let editId       = $state(null)
+  let mundusStones = $state([])
 
   let form = $state(blankForm())
 
@@ -19,9 +20,14 @@
       name: '',
       class_name: character?.class_name ?? ESO_CLASSES[0],
       role: character?.role ?? ESO_ROLES[0],
+      mundus_stone: '',
       patch_version: '',
       notes: '',
     }
+  }
+
+  async function loadMundusStones() {
+    try { mundusStones = await api.getRefMundusStones() } catch (e) { /* non-fatal */ }
   }
 
   async function load() {
@@ -45,6 +51,7 @@
         name: form.name.trim(),
         class_name: form.class_name,
         role: form.role,
+        mundus_stone: form.mundus_stone || null,
         patch_version: form.patch_version || null,
         notes: form.notes || null,
         source_link_id: null,
@@ -73,6 +80,7 @@
     editId = b.id
     form = {
       name: b.name, class_name: b.class_name, role: b.role,
+      mundus_stone: b.mundus_stone || '',
       patch_version: b.patch_version || '', notes: b.notes || '',
     }
     showForm = true
@@ -101,6 +109,7 @@
   function cancelForm() { showForm = false; editId = null; form = blankForm(); error = '' }
 
   load()
+  loadMundusStones()
 </script>
 
 <div class="page">
@@ -151,6 +160,13 @@
           </select>
         </div>
         <div class="form-row">
+          <label>Mundus Stone</label>
+          <select bind:value={form.mundus_stone}>
+            <option value="">— None —</option>
+            {#each mundusStones as ms}<option value={ms.name}>{ms.name}</option>{/each}
+          </select>
+        </div>
+        <div class="form-row">
           <label>Patch Version</label>
           <input bind:value={form.patch_version} placeholder="e.g. U42" />
         </div>
@@ -186,6 +202,7 @@
             <div class="build-meta flex">
               <span class="badge">{ROLE_ICONS[b.role]} {b.role}</span>
               <span class="badge">{b.class_name}</span>
+              {#if b.mundus_stone}<span class="badge badge-mundus">⊕ {b.mundus_stone}</span>{/if}
               {#if b.patch_version}<span class="badge badge-blue">{b.patch_version}</span>{/if}
               {#if b.favorite}<span class="badge badge-gold">★ Favourite</span>{/if}
             </div>
@@ -246,6 +263,8 @@
 
   .build-actions { display: flex; gap: .2rem; opacity: 0; transition: opacity .15s; }
   .build-row:hover .build-actions { opacity: 1; }
+
+  :global(.badge-mundus) { border-color: #7c6ca8; color: #a89fd0; }
 
   @media (max-width: 640px) {
     .build-row { flex-wrap: wrap; }

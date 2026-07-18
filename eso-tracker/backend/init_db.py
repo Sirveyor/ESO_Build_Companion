@@ -30,6 +30,7 @@ def _migrate():
     migrations = [
         "ALTER TABLE traits ADD COLUMN character_id TEXT REFERENCES characters(id)",
         "ALTER TABLE characters ADD COLUMN alliance TEXT",
+        "ALTER TABLE builds ADD COLUMN mundus_stone TEXT",
     ]
     with engine.connect() as conn:
         for sql in migrations:

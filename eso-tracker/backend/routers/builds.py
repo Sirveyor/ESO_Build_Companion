@@ -112,6 +112,7 @@ def duplicate_build(build_id: str, db: Session = Depends(get_db)):
         name=f"{original.name} (Copy)",
         class_name=original.class_name,
         role=original.role,
+        mundus_stone=original.mundus_stone,
         patch_version=original.patch_version,
         source_link_id=original.source_link_id,
         notes=original.notes,

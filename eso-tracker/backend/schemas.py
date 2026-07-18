@@ -34,6 +34,7 @@ class BuildSchema(BaseModel):
     name: str
     class_name: str
     role: str
+    mundus_stone: Optional[str] = None
     patch_version: Optional[str] = None
     source_link_id: Optional[str] = None
     notes: Optional[str] = None

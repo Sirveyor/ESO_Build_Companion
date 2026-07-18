@@ -12,6 +12,7 @@ class Build(Base):
     patch_version = Column(String)
     source_link_id = Column(String, ForeignKey("source_links.id"))
 
+    mundus_stone = Column(String)
     notes = Column(Text)
     last_updated = Column(String)
     favorite = Column(Integer)
