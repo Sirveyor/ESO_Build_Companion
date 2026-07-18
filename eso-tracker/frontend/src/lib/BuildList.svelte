@@ -12,6 +12,7 @@
   let saving       = $state(false)
   let editId       = $state(null)
   let mundusStones = $state([])
+  let refFood      = $state([])
 
   let form = $state(blankForm())
 
@@ -21,13 +22,25 @@
       class_name: character?.class_name ?? ESO_CLASSES[0],
       role: character?.role ?? ESO_ROLES[0],
       mundus_stone: '',
+      food_buff: '',
+      attr_health: 0,
+      attr_magicka: 0,
+      attr_stamina: 0,
       patch_version: '',
       notes: '',
     }
   }
 
+  let attrTotal = $derived(
+    (Number(form.attr_health) || 0) + (Number(form.attr_magicka) || 0) + (Number(form.attr_stamina) || 0)
+  )
+
   async function loadMundusStones() {
     try { mundusStones = await api.getRefMundusStones() } catch (e) { /* non-fatal */ }
+  }
+
+  async function loadFood() {
+    try { refFood = await api.getRefFood() } catch (e) { /* non-fatal */ }
   }
 
   async function load() {
@@ -52,6 +65,10 @@
         class_name: form.class_name,
         role: form.role,
         mundus_stone: form.mundus_stone || null,
+        food_buff: form.food_buff || null,
+        attr_health:  Number(form.attr_health)  || null,
+        attr_magicka: Number(form.attr_magicka) || null,
+        attr_stamina: Number(form.attr_stamina) || null,
         patch_version: form.patch_version || null,
         notes: form.notes || null,
         source_link_id: null,
@@ -81,6 +98,10 @@
     form = {
       name: b.name, class_name: b.class_name, role: b.role,
       mundus_stone: b.mundus_stone || '',
+      food_buff: b.food_buff || '',
+      attr_health:  b.attr_health  ?? 0,
+      attr_magicka: b.attr_magicka ?? 0,
+      attr_stamina: b.attr_stamina ?? 0,
       patch_version: b.patch_version || '', notes: b.notes || '',
     }
     showForm = true
@@ -110,6 +131,7 @@
 
   load()
   loadMundusStones()
+  loadFood()
 </script>
 
 <div class="page">
@@ -167,6 +189,27 @@
           </select>
         </div>
         <div class="form-row">
+          <label>Food / Drink</label>
+          <input bind:value={form.food_buff} list="food-list" placeholder="e.g. Dubious Camoran Throne" />
+          <datalist id="food-list">
+            {#each refFood as f}<option value={f.name}>{f.stat_bonuses}</option>{/each}
+          </datalist>
+        </div>
+        <div class="form-row attr-row">
+          <label>Attributes <span class="attr-total" class:over={attrTotal > 64}>{attrTotal} / 64 pts</span></label>
+          <div class="attr-inputs">
+            <label class="attr-label">Health
+              <input type="number" bind:value={form.attr_health} min="0" max="64" />
+            </label>
+            <label class="attr-label">Magicka
+              <input type="number" bind:value={form.attr_magicka} min="0" max="64" />
+            </label>
+            <label class="attr-label">Stamina
+              <input type="number" bind:value={form.attr_stamina} min="0" max="64" />
+            </label>
+          </div>
+        </div>
+        <div class="form-row">
           <label>Patch Version</label>
           <input bind:value={form.patch_version} placeholder="e.g. U42" />
         </div>
@@ -203,9 +246,17 @@
               <span class="badge">{ROLE_ICONS[b.role]} {b.role}</span>
               <span class="badge">{b.class_name}</span>
               {#if b.mundus_stone}<span class="badge badge-mundus">⊕ {b.mundus_stone}</span>{/if}
+              {#if b.food_buff}<span class="badge badge-food">🍖 {b.food_buff}</span>{/if}
               {#if b.patch_version}<span class="badge badge-blue">{b.patch_version}</span>{/if}
               {#if b.favorite}<span class="badge badge-gold">★ Favourite</span>{/if}
             </div>
+            {#if b.attr_health || b.attr_magicka || b.attr_stamina}
+              <div class="attr-summary">
+                <span>H {b.attr_health ?? 0}</span>
+                <span>M {b.attr_magicka ?? 0}</span>
+                <span>S {b.attr_stamina ?? 0}</span>
+              </div>
+            {/if}
             {#if b.notes}
               <p style="font-size:.8rem;margin-top:.3rem;color:var(--text-dim)">{b.notes}</p>
             {/if}
@@ -265,6 +316,17 @@
   .build-row:hover .build-actions { opacity: 1; }
 
   :global(.badge-mundus) { border-color: #7c6ca8; color: #a89fd0; }
+  :global(.badge-food)   { border-color: #7a5c30; color: #c49a5a; }
+
+  .attr-row label { display: flex; align-items: center; gap: .75rem; }
+  .attr-total { font-size: .75rem; font-weight: 400; color: var(--text-dim); }
+  .attr-total.over { color: var(--red, #e05); }
+  .attr-inputs { display: flex; gap: .75rem; }
+  .attr-label { display: flex; flex-direction: column; font-size: .75rem; color: var(--text-dim); gap: .2rem; }
+  .attr-label input { width: 64px; }
+
+  .attr-summary { display: flex; gap: .75rem; margin-top: .25rem; font-size: .78rem; color: var(--text-dim); }
+  .attr-summary span { font-variant-numeric: tabular-nums; }
 
   @media (max-width: 640px) {
     .build-row { flex-wrap: wrap; }

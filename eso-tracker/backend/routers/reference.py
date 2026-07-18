@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from dependencies import get_db
-from models.reference import RefEnchantment, RefTrait, RefMundusStone, RefSkillLine, RefSkill, RefResearchTrait
-from schemas import RefEnchantmentSchema, RefTraitSchema, RefMundusStoneSchema, RefSkillLineSchema, RefSkillSchema, RefResearchTraitSchema
+from models.reference import RefEnchantment, RefTrait, RefMundusStone, RefSkillLine, RefSkill, RefResearchTrait, RefFood
+from schemas import RefEnchantmentSchema, RefTraitSchema, RefMundusStoneSchema, RefSkillLineSchema, RefSkillSchema, RefResearchTraitSchema, RefFoodSchema
 
 router = APIRouter(prefix="/reference", tags=["Reference"])
 
@@ -54,3 +54,11 @@ def get_ref_research_traits(slot_category: str = None, db: Session = Depends(get
     if slot_category:
         q = q.filter(RefResearchTrait.slot_category == slot_category)
     return q.order_by(RefResearchTrait.slot_category, RefResearchTrait.item_type, RefResearchTrait.trait_name).all()
+
+
+@router.get("/food", response_model=list[RefFoodSchema])
+def get_ref_food(food_type: str = None, db: Session = Depends(get_db)):
+    q = db.query(RefFood)
+    if food_type:
+        q = q.filter(RefFood.food_type == food_type)
+    return q.order_by(RefFood.food_type, RefFood.name).all()

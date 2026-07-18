@@ -35,6 +35,10 @@ class BuildSchema(BaseModel):
     class_name: str
     role: str
     mundus_stone: Optional[str] = None
+    food_buff: Optional[str] = None
+    attr_health: Optional[int] = None
+    attr_magicka: Optional[int] = None
+    attr_stamina: Optional[int] = None
     patch_version: Optional[str] = None
     source_link_id: Optional[str] = None
     notes: Optional[str] = None
@@ -191,6 +195,15 @@ class RefSkillSchema(BaseModel):
     morph_1: Optional[str] = None
     morph_2: Optional[str] = None
     is_ultimate: Optional[int] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RefFoodSchema(BaseModel):
+    id: str
+    name: str
+    stat_bonuses: Optional[str] = None
+    food_type: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 

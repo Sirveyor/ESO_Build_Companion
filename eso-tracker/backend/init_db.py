@@ -22,6 +22,7 @@ def init_db():
     _seed_skill_lines()
     _seed_skills()
     _seed_research_traits()
+    _seed_food()
 
 
 def _migrate():
@@ -31,6 +32,10 @@ def _migrate():
         "ALTER TABLE traits ADD COLUMN character_id TEXT REFERENCES characters(id)",
         "ALTER TABLE characters ADD COLUMN alliance TEXT",
         "ALTER TABLE builds ADD COLUMN mundus_stone TEXT",
+        "ALTER TABLE builds ADD COLUMN food_buff TEXT",
+        "ALTER TABLE builds ADD COLUMN attr_health INTEGER",
+        "ALTER TABLE builds ADD COLUMN attr_magicka INTEGER",
+        "ALTER TABLE builds ADD COLUMN attr_stamina INTEGER",
     ]
     with engine.connect() as conn:
         for sql in migrations:
@@ -223,6 +228,20 @@ def _seed_skills():
                 id=id_, skill_line_id=line_id, name=name,
                 morph_1=morph_1, morph_2=morph_2, is_ultimate=is_ult,
             ))
+        db.commit()
+
+
+def _seed_food():
+    """Populate ref_food with common ESO provisioning buffs. Skips if already seeded."""
+    from sqlalchemy.orm import Session
+    from models.reference import RefFood
+    from seed_food import FOOD
+
+    with Session(engine) as db:
+        if db.query(RefFood).count() > 0:
+            return
+        for (id_, name, stat_bonuses, food_type) in FOOD:
+            db.add(RefFood(id=id_, name=name, stat_bonuses=stat_bonuses, food_type=food_type))
         db.commit()
 
 

@@ -13,6 +13,10 @@ class Build(Base):
     source_link_id = Column(String, ForeignKey("source_links.id"))
 
     mundus_stone = Column(String)
+    food_buff    = Column(String)
+    attr_health  = Column(Integer)
+    attr_magicka = Column(Integer)
+    attr_stamina = Column(Integer)
     notes = Column(Text)
     last_updated = Column(String)
     favorite = Column(Integer)

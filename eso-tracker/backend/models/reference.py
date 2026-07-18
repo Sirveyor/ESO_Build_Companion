@@ -52,6 +52,14 @@ class RefSkill(Base):
     is_ultimate   = Column(Integer, default=0)
 
 
+class RefFood(Base):
+    __tablename__ = "ref_food"
+    id           = Column(String, primary_key=True)
+    name         = Column(String, nullable=False)
+    stat_bonuses = Column(String)
+    food_type    = Column(String)   # Magicka | Stamina | Hybrid | Tank | Healer | XP
+
+
 class RefResearchTrait(Base):
     __tablename__ = "ref_research_traits"
     id            = Column(String, primary_key=True)
