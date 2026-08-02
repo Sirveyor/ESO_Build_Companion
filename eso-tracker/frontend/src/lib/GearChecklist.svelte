@@ -680,8 +680,7 @@
   }
   .enchant-btn:hover { opacity: .75; }
   .enchant-name {
-    max-width: 110px; overflow: hidden; text-overflow: ellipsis;
-    white-space: nowrap; display: block;
+    white-space: normal; word-break: break-word; display: block;
   }
   .enchant-got { color: var(--green); font-size: .7rem; flex-shrink: 0; }
   .enchant-add { font-size: .72rem; padding: .1rem .35rem; color: var(--text-dim); }
