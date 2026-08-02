@@ -194,8 +194,8 @@
             </div>
             <div class="set-actions" onclick={(e) => e.stopPropagation()}>
               <button class="btn-icon" onclick={() => deleteSet(s.id)} title="Delete">✕</button>
-              <span class="expand-icon">{expandedId === s.id ? '▲' : '▼'}</span>
             </div>
+            <span class="expand-icon">{expandedId === s.id ? '▲' : '▼'}</span>
           </div>
 
           {#if expandedId === s.id}
