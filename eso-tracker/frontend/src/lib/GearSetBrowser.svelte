@@ -12,7 +12,9 @@
   let filterType = $state('All')
 
   let bonusForm = $state({ setId: null, pieces_required: 2, bonus_description: '', stat_type: '', stat_value: '' })
-  let showBonusForm = $state(null)  // holds set.id when open
+  let showBonusForm  = $state(null)   // set.id when add-form open
+  let editingBonusId = $state(null)   // bonus.id being edited
+  let editBonusForm  = $state({ pieces_required: 2, bonus_description: '', stat_type: '', stat_value: '' })
 
   let setForm = $state(blankSetForm())
 
@@ -83,6 +85,40 @@
       )
       bonusForm = { ...bonusForm, bonus_description: '', stat_type: '', stat_value: '' }
       showBonusForm = null
+    } catch (e) {
+      error = e.message
+    } finally {
+      saving = false
+    }
+  }
+
+  function startEditBonus(b) {
+    editingBonusId = b.id
+    editBonusForm = {
+      pieces_required:  b.pieces_required,
+      bonus_description: b.bonus_description,
+      stat_type:  b.stat_type  || '',
+      stat_value: b.stat_value ?? '',
+    }
+  }
+
+  async function saveBonus(setId, bonusId) {
+    if (!editBonusForm.bonus_description.trim()) return
+    saving = true
+    try {
+      const updated = await api.updateSetBonus(setId, bonusId, {
+        id: bonusId,
+        set_id: setId,
+        pieces_required: Number(editBonusForm.pieces_required),
+        bonus_description: editBonusForm.bonus_description.trim(),
+        stat_type:  editBonusForm.stat_type  || null,
+        stat_value: editBonusForm.stat_value !== '' ? Number(editBonusForm.stat_value) : null,
+      })
+      sets = sets.map(s => s.id === setId
+        ? { ...s, bonuses: s.bonuses.map(b => b.id === bonusId ? updated : b) }
+        : s
+      )
+      editingBonusId = null
     } catch (e) {
       error = e.message
     } finally {
@@ -202,14 +238,38 @@
             <div class="set-body">
               <div class="bonus-list">
                 {#each [...(s.bonuses || [])].sort((a, b) => a.pieces_required - b.pieces_required) as b (b.id)}
-                  <div class="bonus-row">
-                    <span class="piece-badge badge badge-gold">{b.pieces_required} pc</span>
-                    <span class="bonus-text">{b.bonus_description}</span>
-                    {#if b.stat_type}
-                      <span class="badge badge-green">{b.stat_type}{b.stat_value ? ` +${b.stat_value}` : ''}</span>
-                    {/if}
-                    <button class="btn-icon" onclick={() => deleteBonus(s.id, b.id)} title="Remove bonus">✕</button>
-                  </div>
+                  {#if editingBonusId === b.id}
+                    <div class="bonus-edit-row">
+                      <select bind:value={editBonusForm.pieces_required} class="pieces-select">
+                        {#each [1,2,3,4,5] as n}<option value={n}>{n} pc</option>{/each}
+                      </select>
+                      <input bind:value={editBonusForm.bonus_description}
+                             placeholder="Bonus description" class="desc-input" />
+                      <input bind:value={editBonusForm.stat_type}
+                             placeholder="Stat type" class="stat-input" />
+                      <input type="number" bind:value={editBonusForm.stat_value}
+                             placeholder="Value" class="val-input" />
+                      <button class="btn-primary" style="font-size:.75rem;padding:.2rem .6rem"
+                              onclick={() => saveBonus(s.id, b.id)}
+                              disabled={saving || !editBonusForm.bonus_description.trim()}>
+                        Save
+                      </button>
+                      <button class="btn-ghost" style="font-size:.75rem;padding:.2rem .5rem"
+                              onclick={() => editingBonusId = null}>
+                        ✕
+                      </button>
+                    </div>
+                  {:else}
+                    <div class="bonus-row">
+                      <span class="piece-badge badge badge-gold">{b.pieces_required} pc</span>
+                      <span class="bonus-text">{b.bonus_description}</span>
+                      {#if b.stat_type}
+                        <span class="badge badge-green">{b.stat_type}{b.stat_value ? ` +${b.stat_value}` : ''}</span>
+                      {/if}
+                      <button class="btn-icon" onclick={() => startEditBonus(b)} title="Edit bonus">✎</button>
+                      <button class="btn-icon" onclick={() => deleteBonus(s.id, b.id)} title="Remove bonus">✕</button>
+                    </div>
+                  {/if}
                 {:else}
                   <p style="font-size:.85rem;color:var(--text-dim)">No bonuses added yet.</p>
                 {/each}
@@ -300,6 +360,21 @@
   }
   .piece-badge { font-weight: 700; }
   .bonus-text  { flex: 1; font-size: .9rem; min-width: 0; }
+
+  .bonus-edit-row {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    flex-wrap: wrap;
+    padding: .3rem .5rem;
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+  }
+  .bonus-edit-row .pieces-select { width: 64px; padding: .2rem .3rem; font-size: .8rem; }
+  .bonus-edit-row .desc-input    { flex: 1; min-width: 160px; font-size: .8rem; }
+  .bonus-edit-row .stat-input    { width: 120px; font-size: .8rem; }
+  .bonus-edit-row .val-input     { width: 72px; font-size: .8rem; }
 
   .bonus-form {
     background: var(--bg);

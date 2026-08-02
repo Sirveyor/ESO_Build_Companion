@@ -51,8 +51,9 @@ export const api = {
   getGearSets:    ()              => req('GET',    '/gear-sets/'),
   createGearSet:  (data)          => req('POST',   '/gear-sets/', data),
   deleteGearSet:  (id)            => req('DELETE', `/gear-sets/${id}`),
-  addSetBonus:    (setId, data)   => req('POST',   `/gear-sets/${setId}/bonuses`, data),
-  deleteSetBonus: (setId, bonId)  => req('DELETE', `/gear-sets/${setId}/bonuses/${bonId}`),
+  addSetBonus:    (setId, data)          => req('POST',   `/gear-sets/${setId}/bonuses`, data),
+  updateSetBonus: (setId, bonId, data)   => req('PUT',    `/gear-sets/${setId}/bonuses/${bonId}`, data),
+  deleteSetBonus: (setId, bonId)         => req('DELETE', `/gear-sets/${setId}/bonuses/${bonId}`),
   compareGearSets:(ids)           => req('GET',    `/gear-sets/compare?set_ids=${ids.join(',')}`),
 
   // Build skills
