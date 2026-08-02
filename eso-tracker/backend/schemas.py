@@ -199,6 +199,15 @@ class RefSkillSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class RefWeaponTypeSchema(BaseModel):
+    id: str
+    name: str
+    parent_id: Optional[str] = None
+    sort_order: Optional[int] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class RefFoodSchema(BaseModel):
     id: str
     name: str

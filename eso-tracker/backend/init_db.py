@@ -23,6 +23,7 @@ def init_db():
     _seed_skills()
     _seed_research_traits()
     _seed_food()
+    _seed_weapon_types()
 
 
 def _migrate():
@@ -228,6 +229,20 @@ def _seed_skills():
                 id=id_, skill_line_id=line_id, name=name,
                 morph_1=morph_1, morph_2=morph_2, is_ultimate=is_ult,
             ))
+        db.commit()
+
+
+def _seed_weapon_types():
+    """Populate ref_weapon_types with ESO weapon hierarchy. Skips if already seeded."""
+    from sqlalchemy.orm import Session
+    from models.reference import RefWeaponType
+    from seed_weapon_types import WEAPON_TYPES
+
+    with Session(engine) as db:
+        if db.query(RefWeaponType).count() > 0:
+            return
+        for (id_, name, parent_id, sort_order) in WEAPON_TYPES:
+            db.add(RefWeaponType(id=id_, name=name, parent_id=parent_id, sort_order=sort_order))
         db.commit()
 
 

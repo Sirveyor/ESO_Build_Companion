@@ -52,6 +52,14 @@ class RefSkill(Base):
     is_ultimate   = Column(Integer, default=0)
 
 
+class RefWeaponType(Base):
+    __tablename__ = "ref_weapon_types"
+    id         = Column(String, primary_key=True)
+    name       = Column(String, nullable=False)
+    parent_id  = Column(String)   # None = top-level category
+    sort_order = Column(Integer, default=0)
+
+
 class RefFood(Base):
     __tablename__ = "ref_food"
     id           = Column(String, primary_key=True)

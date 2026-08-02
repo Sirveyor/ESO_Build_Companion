@@ -85,6 +85,7 @@ export const api = {
   getRefSkills:          (skillLineId)    => req('GET', `/reference/skills${skillLineId  ? `?skill_line_id=${encodeURIComponent(skillLineId)}` : ''}`),
   getRefResearchTraits:  (slotCategory)   => req('GET', `/reference/research-traits${slotCategory ? `?slot_category=${encodeURIComponent(slotCategory)}` : ''}`),
   getRefFood:            (foodType)       => req('GET', `/reference/food${foodType ? `?food_type=${encodeURIComponent(foodType)}` : ''}`),
+  getRefWeaponTypes:     ()               => req('GET', '/reference/weapon-types'),
 
   // UESP Scraper
   scraperSearch:  (q)              => req('GET',    `/scraper/search?q=${encodeURIComponent(q)}`),

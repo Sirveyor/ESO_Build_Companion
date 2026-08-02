@@ -172,20 +172,29 @@
   }
 
   // ── Reference data for dropdowns ─────────────────────────────────────────
-  let allGearSets    = $state([])
-  let refEnchantList = $state([])
-  let refTraitList   = $state([])
+  let allGearSets     = $state([])
+  let refEnchantList  = $state([])
+  let refTraitList    = $state([])
+  let refWeaponTypes  = $state([])
+
+  // Leaf weapon types: those that are NOT a parent of any other entry
+  let weaponLeafTypes = $derived.by(() => {
+    const parentIds = new Set(refWeaponTypes.filter(w => w.parent_id != null).map(w => w.parent_id))
+    return refWeaponTypes.filter(w => !parentIds.has(w.id))
+  })
 
   async function loadRefData() {
     try {
-      const [sets, enchs, traits] = await Promise.all([
+      const [sets, enchs, traits, wtypes] = await Promise.all([
         api.getGearSets(),
         api.getRefEnchantments(),
         api.getRefTraits(),
+        api.getRefWeaponTypes(),
       ])
       allGearSets    = sets
       refEnchantList = enchs
       refTraitList   = traits
+      refWeaponTypes = wtypes
     } catch (e) { /* non-fatal; forms fall back to static constants */ }
   }
 
@@ -319,9 +328,17 @@
             </select>
           </div>
           <div class="form-row">
-            <label>Weight / Type</label>
+            <label>{WEAPON_SLOTS.has(form.slot) ? 'Weapon Type' : 'Weight'}</label>
             <select bind:value={form.weight}>
-              {#each GEAR_WEIGHTS as w}<option>{w}</option>{/each}
+              {#if WEAPON_SLOTS.has(form.slot)}
+                {#each weaponLeafTypes as wt}<option value={wt.name}>{wt.name}</option>{/each}
+              {:else if JEWELRY_SLOTS.has(form.slot)}
+                <option>Jewelry</option>
+              {:else}
+                <option>Heavy</option>
+                <option>Medium</option>
+                <option>Light</option>
+              {/if}
             </select>
           </div>
           <div class="form-row">
@@ -451,9 +468,17 @@
                                 </select>
                               </div>
                               <div class="form-row">
-                                <label>Weight / Type</label>
+                                <label>{WEAPON_SLOTS.has(editGearForm.slot) ? 'Weapon Type' : 'Weight'}</label>
                                 <select bind:value={editGearForm.weight}>
-                                  {#each GEAR_WEIGHTS as w}<option>{w}</option>{/each}
+                                  {#if WEAPON_SLOTS.has(editGearForm.slot)}
+                                    {#each weaponLeafTypes as wt}<option value={wt.name}>{wt.name}</option>{/each}
+                                  {:else if JEWELRY_SLOTS.has(editGearForm.slot)}
+                                    <option>Jewelry</option>
+                                  {:else}
+                                    <option>Heavy</option>
+                                    <option>Medium</option>
+                                    <option>Light</option>
+                                  {/if}
                                 </select>
                               </div>
                               <div class="form-row">
