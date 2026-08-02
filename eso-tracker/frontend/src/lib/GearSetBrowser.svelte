@@ -201,7 +201,7 @@
           {#if expandedId === s.id}
             <div class="set-body">
               <div class="bonus-list">
-                {#each (s.bonuses || []).sort((a, b) => a.pieces_required - b.pieces_required) as b (b.id)}
+                {#each [...(s.bonuses || [])].sort((a, b) => a.pieces_required - b.pieces_required) as b (b.id)}
                   <div class="bonus-row">
                     <span class="piece-badge badge badge-gold">{b.pieces_required} pc</span>
                     <span class="bonus-text">{b.bonus_description}</span>
