@@ -396,7 +396,7 @@
                 <thead>
                   <tr>
                     <th>Slot</th>
-                    <th>Weight</th>
+                    <th>Weight / Type</th>
                     <th>Trait</th>
                     <th>Quality</th>
                     <th>Enchant</th>
@@ -410,7 +410,15 @@
                   {#each pieces as item (item.id)}
                     <tr class:obtained={item.obtained}>
                       <td>{item.slot}</td>
-                      <td><span class="badge">{item.weight}</span></td>
+                      <td>
+                        {#if WEAPON_SLOTS.has(item.slot)}
+                          <span class="badge badge-weapon-type">{item.weight || '—'}</span>
+                        {:else if JEWELRY_SLOTS.has(item.slot)}
+                          <span class="badge badge-jewelry-type">{item.weight || '—'}</span>
+                        {:else}
+                          <span class="badge">{item.weight || '—'}</span>
+                        {/if}
+                      </td>
                       <td>{item.trait || '—'}</td>
                       <td>
                         <span class="badge"
@@ -577,6 +585,9 @@
 
 <style>
   .back-btn { margin-bottom: .25rem; font-size: .85rem; }
+
+  :global(.badge-weapon-type)  { border-color: #7a4a2a; color: #c4845a; }
+  :global(.badge-jewelry-type) { border-color: #5a4a7a; color: #9a8ac0; }
 
   .tabs {
     display: flex;
