@@ -165,6 +165,34 @@
   const JEWELRY_SLOTS = new Set(['Neck', 'Ring 1', 'Ring 2'])
   const WEAPON_SLOTS  = new Set(['Main Hand', 'Off Hand', 'Main Hand Backup', 'Off Hand Backup'])
 
+  // Weapon types that occupy both hands — no off-hand can be paired with these
+  const TWO_HANDED_TYPES = new Set([
+    'Battle Axe', 'Greatsword', 'Maul',
+    'Bow',
+    'Flame Staff', 'Frost Staff', 'Lightning Staff',
+    'Restoration Staff',
+  ])
+  const OFFHAND_TO_MAINHAND = { 'Off Hand': 'Main Hand', 'Off Hand Backup': 'Main Hand Backup' }
+  const MAINHAND_TO_OFFHAND = { 'Main Hand': 'Off Hand', 'Main Hand Backup': 'Off Hand Backup' }
+
+  function twoHandedConflict(slot, weight, gearList) {
+    // Adding an off-hand when the paired main hand holds a 2H weapon
+    const mhSlot = OFFHAND_TO_MAINHAND[slot]
+    if (mhSlot) {
+      const mh = gearList.find(g => g.slot === mhSlot)
+      if (mh && TWO_HANDED_TYPES.has(mh.weight))
+        return `${mhSlot} has a ${mh.weight} (two-handed) — an off-hand cannot be equipped on the same bar.`
+    }
+    // Adding/changing a main hand to a 2H weapon when the paired off-hand already exists
+    const ohSlot = MAINHAND_TO_OFFHAND[slot]
+    if (ohSlot && TWO_HANDED_TYPES.has(weight)) {
+      const oh = gearList.find(g => g.slot === ohSlot)
+      if (oh)
+        return `${weight} is two-handed — remove the ${ohSlot} piece (${oh.set_name}) first, or it cannot be equipped.`
+    }
+    return null
+  }
+
   function slotType(slot) {
     if (JEWELRY_SLOTS.has(slot)) return 'Jewelry'
     if (WEAPON_SLOTS.has(slot))  return 'Weapon'
@@ -216,6 +244,11 @@
     const filtered = refTraitList.filter(t => t.slot_type === slotType(editGearForm.slot))
     return filtered.length ? filtered.map(t => t.name) : GEAR_TRAITS
   })
+
+  let addConflict  = $derived(twoHandedConflict(form.slot, form.weight, gear))
+  let editConflict = $derived.by(() =>
+    twoHandedConflict(editGearForm.slot, editGearForm.weight, gear.filter(g => g.id !== editGear))
+  )
 
   // Auto-fill "where to get" from the matched gear set's location
   $effect(() => {
@@ -358,7 +391,10 @@
             <input bind:value={form.notes} placeholder="e.g. Deshaan overland" />
           </div>
         </div>
-        <button class="btn-primary" onclick={addGear} disabled={saving || !form.set_name.trim()}>
+        {#if addConflict}
+          <div class="notice notice-warn" style="margin-bottom:.5rem">{addConflict}</div>
+        {/if}
+        <button class="btn-primary" onclick={addGear} disabled={saving || !form.set_name.trim() || !!addConflict}>
           {saving ? 'Adding…' : 'Add Piece'}
         </button>
       </div>
@@ -506,10 +542,13 @@
                                 <input bind:value={editGearForm.notes} placeholder="e.g. Deshaan overland" />
                               </div>
                             </div>
+                            {#if editConflict}
+                              <div class="notice notice-warn" style="margin:.4rem 0 .25rem">{editConflict}</div>
+                            {/if}
                             <div class="flex" style="gap:.4rem;margin-top:.5rem">
                               <button class="btn-primary" style="padding:.25rem .75rem;flex-shrink:0"
                                       onclick={() => saveGearEdit(item)}
-                                      disabled={savingEdit || !editGearForm.set_name.trim()}>
+                                      disabled={savingEdit || !editGearForm.set_name.trim() || !!editConflict}>
                                 {savingEdit ? '…' : 'Save'}
                               </button>
                               <button class="btn-ghost" style="padding:.25rem .75rem;flex-shrink:0"
