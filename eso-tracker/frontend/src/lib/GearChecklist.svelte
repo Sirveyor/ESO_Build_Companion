@@ -193,6 +193,13 @@
     return null
   }
 
+  function duplicateSlotConflict(slot, gearList) {
+    const existing = gearList.find(g => g.slot === slot)
+    if (existing)
+      return `The ${slot} slot is already filled by ${existing.set_name} in this build.`
+    return null
+  }
+
   function slotType(slot) {
     if (JEWELRY_SLOTS.has(slot)) return 'Jewelry'
     if (WEAPON_SLOTS.has(slot))  return 'Weapon'
@@ -245,10 +252,15 @@
     return filtered.length ? filtered.map(t => t.name) : GEAR_TRAITS
   })
 
-  let addConflict  = $derived(twoHandedConflict(form.slot, form.weight, gear))
-  let editConflict = $derived.by(() =>
-    twoHandedConflict(editGearForm.slot, editGearForm.weight, gear.filter(g => g.id !== editGear))
+  let addConflict  = $derived.by(() =>
+    duplicateSlotConflict(form.slot, gear) ||
+    twoHandedConflict(form.slot, form.weight, gear)
   )
+  let editConflict = $derived.by(() => {
+    const others = gear.filter(g => g.id !== editGear)
+    return duplicateSlotConflict(editGearForm.slot, others) ||
+           twoHandedConflict(editGearForm.slot, editGearForm.weight, others)
+  })
 
   // Auto-fill "where to get" from the matched gear set's location
   $effect(() => {
