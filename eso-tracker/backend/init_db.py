@@ -12,6 +12,8 @@ import models.links         # noqa: F401
 import models.champion_points  # noqa: F401
 import models.build_skills     # noqa: F401
 import models.reference        # noqa: F401
+import models.recipe           # noqa: F401
+import models.motif            # noqa: F401
 
 
 def init_db():
@@ -23,7 +25,9 @@ def init_db():
     _seed_skills()
     _seed_research_traits()
     _seed_food()
+    _seed_drinks()
     _seed_weapon_types()
+    _seed_motifs()
 
 
 def _migrate():
@@ -37,6 +41,20 @@ def _migrate():
         "ALTER TABLE builds ADD COLUMN attr_health INTEGER",
         "ALTER TABLE builds ADD COLUMN attr_magicka INTEGER",
         "ALTER TABLE builds ADD COLUMN attr_stamina INTEGER",
+        # ref_food extended columns
+        "ALTER TABLE ref_food ADD COLUMN dish_type TEXT",
+        "ALTER TABLE ref_food ADD COLUMN ri INTEGER",
+        "ALTER TABLE ref_food ADD COLUMN rq INTEGER",
+        "ALTER TABLE ref_food ADD COLUMN food_level INTEGER",
+        "ALTER TABLE ref_food ADD COLUMN health_bonus INTEGER",
+        "ALTER TABLE ref_food ADD COLUMN magicka_bonus INTEGER",
+        "ALTER TABLE ref_food ADD COLUMN stamina_bonus INTEGER",
+        "ALTER TABLE ref_food ADD COLUMN ing_meat TEXT",
+        "ALTER TABLE ref_food ADD COLUMN ing_fruit TEXT",
+        "ALTER TABLE ref_food ADD COLUMN ing_veg TEXT",
+        "ALTER TABLE ref_food ADD COLUMN ing_med TEXT",
+        "ALTER TABLE ref_food ADD COLUMN ing_impr TEXT",
+        "ALTER TABLE ref_food ADD COLUMN duration INTEGER",
     ]
     with engine.connect() as conn:
         for sql in migrations:
@@ -216,19 +234,25 @@ def _seed_skill_lines():
 
 
 def _seed_skills():
-    """Populate ref_skills on first run. Skips if already seeded."""
+    """Populate ref_skills, inserting missing entries by ID. Handles moved/removed skills."""
     from sqlalchemy.orm import Session
     from models.reference import RefSkill
     from seed_skills import SKILLS
 
+    # IDs removed from seed data that should be cleaned up from the database
+    REMOVED_IDS = {"sk-nb-sha-2"}  # Veiled Strike moved from Shadow to Assassination
+
     with Session(engine) as db:
-        if db.query(RefSkill).count() > 0:
-            return
+        for old_id in REMOVED_IDS:
+            old = db.query(RefSkill).filter_by(id=old_id).first()
+            if old:
+                db.delete(old)
         for (id_, line_id, name, morph_1, morph_2, is_ult) in SKILLS:
-            db.add(RefSkill(
-                id=id_, skill_line_id=line_id, name=name,
-                morph_1=morph_1, morph_2=morph_2, is_ultimate=is_ult,
-            ))
+            if not db.query(RefSkill).filter_by(id=id_).first():
+                db.add(RefSkill(
+                    id=id_, skill_line_id=line_id, name=name,
+                    morph_1=morph_1, morph_2=morph_2, is_ultimate=is_ult,
+                ))
         db.commit()
 
 
@@ -247,16 +271,142 @@ def _seed_weapon_types():
 
 
 def _seed_food():
-    """Populate ref_food with common ESO provisioning buffs. Skips if already seeded."""
+    """Re-seed ref_food from the comprehensive RECIPES list, replacing legacy stub data."""
+    import re
     from sqlalchemy.orm import Session
     from models.reference import RefFood
-    from seed_food import FOOD
+    from seed_food import RECIPES
+
+    _FOOD_TYPE = {
+        "Meat": "Health", "Fruit": "Magicka", "Vegetable": "Stamina",
+        "Savoury": "Health+Magicka", "Ragout": "Health+Stamina",
+        "Entremet": "Magicka+Stamina", "Gourmet": "All Stats",
+        "Special": "Event",
+        # Drinks
+        "Alcohol":    "Health Recovery",
+        "Tea":        "Magicka Recovery",
+        "Tonic":      "Stamina Recovery",
+        "Liqueur":    "Health+Magicka Recovery",
+        "Tincture":   "Health+Stamina Recovery",
+        "Cordial":    "Magicka+Stamina Recovery",
+        "Distillate": "All Recovery",
+    }
+
+    _DRINK_TYPES = {"Alcohol", "Tea", "Tonic", "Liqueur", "Tincture", "Cordial", "Distillate"}
+
+    def _slug(s):
+        return re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
+
+    def _bonuses(h, m, s, dish=""):
+        is_drink = dish in _DRINK_TYPES
+        label = "Recovery" if is_drink else "Max"
+        parts = []
+        if h: parts.append(f"+{h} Health {label}")
+        if m: parts.append(f"+{m} Magicka {label}")
+        if s: parts.append(f"+{s} Stamina {label}")
+        return ", ".join(parts)
 
     with Session(engine) as db:
-        if db.query(RefFood).count() > 0:
-            return
-        for (id_, name, stat_bonuses, food_type) in FOOD:
-            db.add(RefFood(id=id_, name=name, stat_bonuses=stat_bonuses, food_type=food_type))
+        existing_ids = {r.id for r in db.query(RefFood.id).all()}
+        for row in RECIPES:
+            (name, ri, rq, lvl, dish, hp, mp, sp,
+             i_meat, i_fruit, i_veg, i_med, i_impr, dur) = row
+            rid = f"food-{_slug(name)}"
+            if rid in existing_ids:
+                continue
+            db.add(RefFood(
+                id=rid, name=name,
+                stat_bonuses=_bonuses(hp, mp, sp, dish),
+                food_type=_FOOD_TYPE.get(dish, dish),
+                dish_type=dish, ri=ri, rq=rq, food_level=lvl,
+                health_bonus=hp, magicka_bonus=mp, stamina_bonus=sp,
+                ing_meat=i_meat, ing_fruit=i_fruit, ing_veg=i_veg,
+                ing_med=i_med, ing_impr=i_impr, duration=dur,
+            ))
+        db.commit()
+
+
+def _seed_drinks():
+    """Seed standard provisioning drink recipes into ref_food. Skips existing rows by ID."""
+    import re
+    from sqlalchemy.orm import Session
+    from models.reference import RefFood
+    from seed_drinks import DRINKS
+
+    _DRINK_FOOD_TYPE = {
+        "Alcohol":    "Health Recovery",
+        "Tea":        "Magicka Recovery",
+        "Tonic":      "Stamina Recovery",
+        "Liqueur":    "Health+Magicka Recovery",
+        "Tincture":   "Health+Stamina Recovery",
+        "Cordial":    "Magicka+Stamina Recovery",
+        "Distillate": "All Recovery",
+    }
+
+    def _slug(s):
+        return re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
+
+    def _bonuses(h, m, s):
+        parts = []
+        if h: parts.append(f"+{h} Health Recovery")
+        if m: parts.append(f"+{m} Magicka Recovery")
+        if s: parts.append(f"+{s} Stamina Recovery")
+        return ", ".join(parts)
+
+    with Session(engine) as db:
+        existing_ids = {r.id for r in db.query(RefFood.id).all()}
+        for row in DRINKS:
+            (name, ri, rq, lvl, dish, hp, mp, sp,
+             i_alco, i_tea, i_tonic, i_med, i_impr, dur) = row
+            rid = f"food-{_slug(name)}"
+            if rid in existing_ids:
+                continue
+            db.add(RefFood(
+                id=rid, name=name,
+                stat_bonuses=_bonuses(hp, mp, sp),
+                food_type=_DRINK_FOOD_TYPE.get(dish, dish),
+                dish_type=dish, ri=ri, rq=rq, food_level=lvl,
+                health_bonus=hp, magicka_bonus=mp, stamina_bonus=sp,
+                ing_meat=i_alco, ing_fruit=i_tea, ing_veg=i_tonic,
+                ing_med=i_med, ing_impr=i_impr, duration=dur,
+            ))
+        db.commit()
+
+
+def _seed_motifs():
+    """Populate ref_motifs from MOTIFS. Skips entries that already exist by ID.
+
+    Motifs marked chapters=True are farmed piecemeal, so each expands into one row
+    per the 14 fixed gear-slot chapters rather than a single book-level row.
+    """
+    import re
+    from sqlalchemy.orm import Session
+    from models.reference import RefMotif
+    from seed_motifs import MOTIFS
+
+    CHAPTER_NAMES = [
+        "Axes", "Belt", "Boots", "Bows", "Chest", "Daggers", "Gloves",
+        "Helmets", "Legs", "Maces", "Shields", "Shoulders", "Staves", "Swords",
+    ]
+
+    def _slug(s):
+        return re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
+
+    with Session(engine) as db:
+        existing_ids = {r.id for r in db.query(RefMotif.id).all()}
+        for (name, motif_number, category, chapters, source) in MOTIFS:
+            base = f"motif-{_slug(name)}"
+            entries = (
+                [(f"{base}-{_slug(c)}", c) for c in CHAPTER_NAMES]
+                if chapters else [(base, None)]
+            )
+            for mid, chapter in entries:
+                if mid in existing_ids:
+                    continue
+                db.add(RefMotif(
+                    id=mid, name=name, motif_number=motif_number,
+                    category=category, chapter=chapter, source=source,
+                ))
         db.commit()
 
 

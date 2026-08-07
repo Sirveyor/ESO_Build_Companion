@@ -54,6 +54,16 @@
               onclick={() => navigate('reference')}>
         Reference
       </button>
+      {#if curChar}
+        <button class:active={page === 'recipes'}
+                onclick={() => navigate('recipes')}>
+          Recipes
+        </button>
+        <button class:active={page === 'motifs'}
+                onclick={() => navigate('motifs')}>
+          Motifs
+        </button>
+      {/if}
     </nav>
 
     <div class="user-chip">

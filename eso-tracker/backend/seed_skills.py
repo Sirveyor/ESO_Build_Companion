@@ -71,11 +71,11 @@ SKILLS = [
     ("sk-nb-ass-3", "sl-nb-assassin", "Blur",              "Phantasmal Escape","Mirage",                0),
     ("sk-nb-ass-4", "sl-nb-assassin", "Mark Target",       "Piercing Mark",    "Reaper's Mark",         0),
     ("sk-nb-ass-5", "sl-nb-assassin", "Grim Focus",        "Merciless Resolve","Relentless Focus",      0),
+    ("sk-nb-ass-6", "sl-nb-assassin", "Veiled Strike",    "Concealed Weapon",  "Surprise Attack",       0),
     ("sk-nb-ass-u", "sl-nb-assassin", "Death Stroke",      "Incapacitating Strike", "Soul Harvest",     1),
 
     # Shadow
     ("sk-nb-sha-1", "sl-nb-shadow", "Shadow Cloak",       "Dark Cloak",        "Shadowy Disguise",      0),
-    ("sk-nb-sha-2", "sl-nb-shadow", "Veiled Strike",      "Surprise Attack",   "Concealed Weapon",      0),
     ("sk-nb-sha-3", "sl-nb-shadow", "Path of Darkness",   "Refreshing Path",   "Twisting Path",         0),
     ("sk-nb-sha-4", "sl-nb-shadow", "Aspect of Terror",   "Mass Hysteria",     "Manifestation of Terror",0),
     ("sk-nb-sha-5", "sl-nb-shadow", "Summon Shade",       "Dark Shade",        "Shadow Image",          0),

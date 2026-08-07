@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from dependencies import get_db
-from models.reference import RefEnchantment, RefTrait, RefMundusStone, RefSkillLine, RefSkill, RefResearchTrait, RefFood, RefWeaponType
-from schemas import RefEnchantmentSchema, RefTraitSchema, RefMundusStoneSchema, RefSkillLineSchema, RefSkillSchema, RefResearchTraitSchema, RefFoodSchema, RefWeaponTypeSchema
+from models.reference import RefEnchantment, RefTrait, RefMundusStone, RefSkillLine, RefSkill, RefResearchTrait, RefFood, RefWeaponType, RefMotif
+from schemas import RefEnchantmentSchema, RefTraitSchema, RefMundusStoneSchema, RefSkillLineSchema, RefSkillSchema, RefResearchTraitSchema, RefFoodSchema, RefWeaponTypeSchema, RefMotifSchema
 
 router = APIRouter(prefix="/reference", tags=["Reference"])
 
@@ -67,3 +67,11 @@ def get_ref_food(food_type: str = None, db: Session = Depends(get_db)):
 @router.get("/weapon-types", response_model=list[RefWeaponTypeSchema])
 def get_ref_weapon_types(db: Session = Depends(get_db)):
     return db.query(RefWeaponType).order_by(RefWeaponType.sort_order).all()
+
+
+@router.get("/motifs", response_model=list[RefMotifSchema])
+def get_ref_motifs(category: str = None, db: Session = Depends(get_db)):
+    q = db.query(RefMotif)
+    if category:
+        q = q.filter(RefMotif.category == category)
+    return q.order_by(RefMotif.category, RefMotif.motif_number, RefMotif.name).all()

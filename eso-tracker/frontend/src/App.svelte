@@ -8,9 +8,11 @@
   import SetComparison  from './lib/SetComparison.svelte'
   import Scraper          from './lib/Scraper.svelte'
   import ReferenceLibrary from './lib/ReferenceLibrary.svelte'
+  import RecipeTracker    from './lib/RecipeTracker.svelte'
+  import MotifTracker     from './lib/MotifTracker.svelte'
 
   // ── Router state ─────────────────────────────────────────────────────────
-  // page: 'home' | 'characters' | 'character' | 'build' | 'gear-sets' | 'compare' | 'scraper' | 'reference'
+  // page: 'home' | 'characters' | 'character' | 'build' | 'gear-sets' | 'compare' | 'scraper' | 'reference' | 'recipes' | 'motifs'
   let page      = $state('home')
   let curUser   = $state(null)
   let curChar   = $state(null)
@@ -64,6 +66,12 @@
 
   {:else if page === 'reference'}
     <ReferenceLibrary />
+
+  {:else if page === 'recipes'}
+    <RecipeTracker character={curChar} />
+
+  {:else if page === 'motifs'}
+    <MotifTracker character={curChar} />
   {/if}
 </main>
 

@@ -62,10 +62,33 @@ class RefWeaponType(Base):
 
 class RefFood(Base):
     __tablename__ = "ref_food"
+    id             = Column(String,  primary_key=True)
+    name           = Column(String,  nullable=False)
+    stat_bonuses   = Column(String)               # computed display string kept for BuildList compat
+    food_type      = Column(String)               # Health | Magicka | Stamina | Health+Magicka | etc.
+    dish_type      = Column(String)               # Meat | Fruit | Vegetable | Savoury | Ragout | Entremet | Gourmet
+    ri             = Column(Integer, default=1)   # Recipe Improvement level required
+    rq             = Column(Integer, default=1)   # Recipe quality tier
+    food_level     = Column(Integer, default=1)   # Character level food scales to
+    health_bonus   = Column(Integer, default=0)
+    magicka_bonus  = Column(Integer, default=0)
+    stamina_bonus  = Column(Integer, default=0)
+    ing_meat       = Column(String)               # Protein ingredient type
+    ing_fruit      = Column(String)               # Fruit ingredient type
+    ing_veg        = Column(String)               # Vegetable ingredient type
+    ing_med        = Column(String)               # Spice / medicine ingredient
+    ing_impr       = Column(String)               # Improvement ingredient (Frost Mirriam)
+    duration       = Column(Integer, default=35)  # Buff duration in minutes
+
+
+class RefMotif(Base):
+    __tablename__ = "ref_motifs"
     id           = Column(String, primary_key=True)
-    name         = Column(String, nullable=False)
-    stat_bonuses = Column(String)
-    food_type    = Column(String)   # Magicka | Stamina | Hybrid | Tank | Healer | XP
+    name         = Column(String, nullable=False)  # Style name, e.g. "High Elf Style"
+    motif_number = Column(Integer)                 # "Crafting Motif N" number
+    category     = Column(String, nullable=False)  # Racial | Crafted | Crown Store | Dungeon/Trial | Overland | Event | PvP/Imperial City
+    chapter      = Column(String)                  # None for single-book motifs; chapter name otherwise
+    source       = Column(Text)                    # How/where the book or chapter is obtained
 
 
 class RefResearchTrait(Base):

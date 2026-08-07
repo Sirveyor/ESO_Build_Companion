@@ -228,10 +228,12 @@
                 <span class="badge" style="margin-left:.25rem">{s.location}</span>
               {/if}
             </div>
-            <div class="set-actions" onclick={(e) => e.stopPropagation()}>
-              <button class="btn-icon" onclick={() => deleteSet(s.id)} title="Delete">✕</button>
+            <div class="set-right">
+              <div class="set-actions" onclick={(e) => e.stopPropagation()}>
+                <button class="btn-icon" onclick={() => deleteSet(s.id)} title="Delete">✕</button>
+              </div>
+              <span class="expand-icon">{expandedId === s.id ? '▲' : '▼'}</span>
             </div>
-            <span class="expand-icon">{expandedId === s.id ? '▲' : '▼'}</span>
           </div>
 
           {#if expandedId === s.id}
@@ -328,17 +330,17 @@
   .set-header {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     padding: .875rem 1rem;
     cursor: pointer;
     gap: .75rem;
   }
   .set-header:hover { background: var(--surface-2); }
 
-  .set-title { display: flex; align-items: center; flex-wrap: wrap; gap: .3rem; }
+  .set-title { display: flex; align-items: center; flex-wrap: wrap; gap: .3rem; flex: 1; }
   .set-name  { font-weight: 600; font-size: 1rem; }
 
-  .set-actions { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
+  .set-right   { display: flex; align-items: center; gap: .25rem; flex-shrink: 0; }
+  .set-actions { display: flex; align-items: center; }
   .expand-icon { color: var(--text-dim); font-size: .75rem; }
 
   .set-body {

@@ -1,7 +1,7 @@
 from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import characters, builds, gear, skills, traits, sources, users, gear_sets, scraper, reference
+from routers import characters, builds, gear, skills, traits, sources, users, gear_sets, scraper, reference, recipes, motifs
 from init_db import init_db
 
 _VERSION_FILE = Path(__file__).parent.parent / "VERSION"
@@ -36,3 +36,5 @@ app.include_router(traits.router)
 app.include_router(sources.router)
 app.include_router(scraper.router)
 app.include_router(reference.router)
+app.include_router(recipes.router)
+app.include_router(motifs.router)

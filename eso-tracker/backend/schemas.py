@@ -213,6 +213,48 @@ class RefFoodSchema(BaseModel):
     name: str
     stat_bonuses: Optional[str] = None
     food_type: Optional[str] = None
+    dish_type: Optional[str] = None
+    ri: Optional[int] = None
+    rq: Optional[int] = None
+    food_level: Optional[int] = None
+    health_bonus: Optional[int] = None
+    magicka_bonus: Optional[int] = None
+    stamina_bonus: Optional[int] = None
+    ing_meat: Optional[str] = None
+    ing_fruit: Optional[str] = None
+    ing_veg: Optional[str] = None
+    ing_med: Optional[str] = None
+    ing_impr: Optional[str] = None
+    duration: Optional[int] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class LearnedRecipeSchema(BaseModel):
+    id: str
+    character_id: str
+    recipe_id: str
+    learned_at: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RefMotifSchema(BaseModel):
+    id: str
+    name: str
+    motif_number: Optional[int] = None
+    category: str
+    chapter: Optional[str] = None
+    source: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class LearnedMotifSchema(BaseModel):
+    id: str
+    character_id: str
+    motif_id: str
+    learned_at: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 

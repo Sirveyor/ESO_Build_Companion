@@ -86,6 +86,17 @@ export const api = {
   getRefResearchTraits:  (slotCategory)   => req('GET', `/reference/research-traits${slotCategory ? `?slot_category=${encodeURIComponent(slotCategory)}` : ''}`),
   getRefFood:            (foodType)       => req('GET', `/reference/food${foodType ? `?food_type=${encodeURIComponent(foodType)}` : ''}`),
   getRefWeaponTypes:     ()               => req('GET', '/reference/weapon-types'),
+  getRefMotifs:          (category)       => req('GET', `/reference/motifs${category ? `?category=${encodeURIComponent(category)}` : ''}`),
+
+  // Learned Recipes (per character)
+  getLearnedRecipes:  (charId) => req('GET',    `/recipes/${charId ? `?character_id=${charId}` : ''}`),
+  learnRecipe:        (data)   => req('POST',   '/recipes/', data),
+  unlearnRecipe:      (id)     => req('DELETE', `/recipes/${id}`),
+
+  // Learned Motifs (per character)
+  getLearnedMotifs: (charId) => req('GET',    `/motifs/${charId ? `?character_id=${charId}` : ''}`),
+  learnMotif:       (data)   => req('POST',   '/motifs/', data),
+  unlearnMotif:     (id)     => req('DELETE', `/motifs/${id}`),
 
   // UESP Scraper
   scraperSearch:  (q)              => req('GET',    `/scraper/search?q=${encodeURIComponent(q)}`),
