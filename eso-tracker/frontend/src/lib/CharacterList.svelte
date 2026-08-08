@@ -17,6 +17,7 @@
     return {
       name: '', class_name: ESO_CLASSES[0], race: ESO_RACES[0],
       role: ESO_ROLES[0], alliance: ESO_ALLIANCES[0], level: 50, champion_points: 0, notes: '',
+      custom_portrait: '',
     }
   }
 
@@ -43,7 +44,7 @@
         user_id: user.id,
         active_build_id: null,
         last_updated: new Date().toISOString(),
-        custom_portrait: null,
+        custom_portrait: form.custom_portrait.trim() || null,
       }
       if (editId) {
         const updated = await api.updateCharacter(editId, { ...payload, id: editId })
@@ -67,6 +68,7 @@
       name: c.name, class_name: c.class_name, race: c.race,
       role: c.role, alliance: c.alliance || ESO_ALLIANCES[0],
       level: c.level, champion_points: c.champion_points, notes: c.notes || '',
+      custom_portrait: c.custom_portrait || '',
     }
     showForm = true
   }
@@ -97,6 +99,15 @@
     <button class="btn-primary" onclick={() => { showForm = !showForm; if (!showForm) cancelForm() }}>
       {showForm && !editId ? 'Cancel' : '+ New Character'}
     </button>
+  </div>
+
+  <div class="class-key">
+    {#each ESO_CLASSES as c}
+      <span class="class-key-item">
+        <span class="class-key-dot" style="background:{CLASS_COLORS[c]}"></span>
+        {c}
+      </span>
+    {/each}
   </div>
 
   {#if error}
@@ -145,6 +156,10 @@
         </div>
       </div>
       <div class="form-row">
+        <label>Portrait URL</label>
+        <input bind:value={form.custom_portrait} placeholder="https://…  (optional, falls back to class color)" />
+      </div>
+      <div class="form-row">
         <label>Notes</label>
         <textarea bind:value={form.notes} placeholder="Optional notes…"></textarea>
       </div>
@@ -169,7 +184,11 @@
     <div class="grid-2">
       {#each characters as c (c.id)}
         <div class="card card-clickable char-card" onclick={() => onselect(c)}>
-          <div class="class-dot" style="background:{CLASS_COLORS[c.class_name] || '#666'}"></div>
+          {#if c.custom_portrait}
+            <img class="char-avatar" src={c.custom_portrait} alt="{c.name} portrait" />
+          {:else}
+            <div class="char-avatar char-avatar-fallback" style="background:{CLASS_COLORS[c.class_name] || '#666'}"></div>
+          {/if}
           <div class="char-info">
             <div class="char-name">{c.name}</div>
             <div class="char-meta">
@@ -198,6 +217,30 @@
 <style>
   .back-btn { margin-bottom: .25rem; font-size: .85rem; }
 
+  .class-key {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .3rem .9rem;
+    margin-bottom: 1.25rem;
+    padding: .5rem .75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .class-key-item {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: .75rem;
+    color: var(--text-dim);
+  }
+  .class-key-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
   .char-card {
     display: flex;
     align-items: flex-start;
@@ -205,13 +248,15 @@
     position: relative;
   }
 
-  .class-dot {
-    width: 10px;
-    height: 10px;
+  .char-avatar {
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     flex-shrink: 0;
-    margin-top: .35rem;
+    object-fit: cover;
+    border: 1px solid var(--border);
   }
+  .char-avatar-fallback { border: none; }
 
   .char-info { flex: 1; min-width: 0; }
   .char-name { font-weight: 600; font-size: 1.05rem; margin-bottom: .35rem; }

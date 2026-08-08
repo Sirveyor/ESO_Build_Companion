@@ -23,7 +23,7 @@
   function blankForm() {
     return {
       set_name: '', slot: GEAR_SLOTS[0], weight: GEAR_WEIGHTS[0],
-      trait: GEAR_TRAITS[0], quality: GEAR_QUALITY[3], notes: '',
+      trait: GEAR_TRAITS[0], quality: GEAR_QUALITY[3], notes: '', custom_icon: '',
     }
   }
 
@@ -70,7 +70,7 @@
         transmute_cost: null,
         notes: null,
         last_updated: new Date().toISOString(),
-        custom_icon: null,
+        custom_icon: form.custom_icon.trim() || null,
         enchantment: null,
       })
       gear = [...gear, created]
@@ -118,7 +118,7 @@
 
   // ── Gear item editing ─────────────────────────────────────────────────────
   let editGear     = $state(null)
-  let editGearForm = $state({ set_name: '', slot: GEAR_SLOTS[0], weight: GEAR_WEIGHTS[0], trait: GEAR_TRAITS[0], quality: GEAR_QUALITY[3], notes: '' })
+  let editGearForm = $state({ set_name: '', slot: GEAR_SLOTS[0], weight: GEAR_WEIGHTS[0], trait: GEAR_TRAITS[0], quality: GEAR_QUALITY[3], notes: '', custom_icon: '' })
   let savingEdit   = $state(false)
 
   function openGearEdit(item) {
@@ -129,6 +129,7 @@
       trait:    item.trait    || GEAR_TRAITS[0],
       quality:  item.quality  || GEAR_QUALITY[3],
       notes:    item.source_notes || '',
+      custom_icon: item.custom_icon || '',
     }
     editGear    = item.id
     editEnchant = null
@@ -146,6 +147,7 @@
         trait:        editGearForm.trait,
         quality:      editGearForm.quality,
         source_notes: editGearForm.notes || null,
+        custom_icon:  editGearForm.custom_icon.trim() || null,
         last_updated: new Date().toISOString(),
       })
       gear    = gear.map(g => g.id === item.id ? { ...updated, enchantment: item.enchantment } : g)
@@ -402,6 +404,10 @@
             <label>Notes / Where to get</label>
             <input bind:value={form.notes} placeholder="e.g. Deshaan overland" />
           </div>
+          <div class="form-row">
+            <label>Icon URL</label>
+            <input bind:value={form.custom_icon} placeholder="https://…  (optional)" />
+          </div>
         </div>
         {#if addConflict}
           <div class="notice notice-warn" style="margin-bottom:.5rem">{addConflict}</div>
@@ -443,6 +449,7 @@
               <table>
                 <thead>
                   <tr>
+                    <th></th>
                     <th>Slot</th>
                     <th>Weight / Type</th>
                     <th>Trait</th>
@@ -457,6 +464,11 @@
                 <tbody>
                   {#each pieces as item (item.id)}
                     <tr class:obtained={item.obtained}>
+                      <td class="icon-cell">
+                        {#if item.custom_icon}
+                          <img class="gear-icon" src={item.custom_icon} alt="" />
+                        {/if}
+                      </td>
                       <td>{item.slot}</td>
                       <td>
                         {#if WEAPON_SLOTS.has(item.slot)}
@@ -510,7 +522,7 @@
                     </tr>
                     {#if editGear === item.id}
                       <tr class="gear-edit-row">
-                        <td colspan="9">
+                        <td colspan="10">
                           <div class="gear-edit-form">
                             <div class="form-grid gear-edit-grid">
                               <div class="form-row">
@@ -553,6 +565,10 @@
                                 <label>Notes / Where to get</label>
                                 <input bind:value={editGearForm.notes} placeholder="e.g. Deshaan overland" />
                               </div>
+                              <div class="form-row">
+                                <label>Icon URL</label>
+                                <input bind:value={editGearForm.custom_icon} placeholder="https://…  (optional)" />
+                              </div>
                             </div>
                             {#if editConflict}
                               <div class="notice notice-warn" style="margin:.4rem 0 .25rem">{editConflict}</div>
@@ -572,7 +588,7 @@
                     {/if}
                     {#if editEnchant === item.id}
                       <tr class="enchant-edit-row">
-                        <td colspan="9">
+                        <td colspan="10">
                           <div class="enchant-form">
                             <input class="enchant-type-input"
                                    list="glyphs-{item.id}"
@@ -686,6 +702,16 @@
   .enchant-add { font-size: .72rem; padding: .1rem .35rem; color: var(--text-dim); }
 
   .actions-cell { white-space: nowrap; }
+
+  .icon-cell { width: 30px; padding-right: 0; }
+  .gear-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 3px;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    display: block;
+  }
 
   .gear-edit-row td { padding: .6rem .75rem; background: var(--surface-2); border-top: none; }
   .gear-edit-form { }
