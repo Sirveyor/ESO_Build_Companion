@@ -382,6 +382,7 @@ def _seed_motifs():
     import re
     from sqlalchemy.orm import Session
     from models.reference import RefMotif
+    from models.motif import LearnedMotif
     from seed_motifs import MOTIFS
 
     CHAPTER_NAMES = [
@@ -389,10 +390,19 @@ def _seed_motifs():
         "Helmets", "Legs", "Maces", "Shields", "Shoulders", "Staves", "Swords",
     ]
 
+    # IDs removed from seed data that should be cleaned up from the database
+    REMOVED_IDS = {"motif-dremora-style"}  # reclassified from single-book to 14 chapters
+
     def _slug(s):
         return re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
 
     with Session(engine) as db:
+        for old_id in REMOVED_IDS:
+            old = db.query(RefMotif).filter_by(id=old_id).first()
+            if old:
+                db.query(LearnedMotif).filter_by(motif_id=old_id).delete()
+                db.delete(old)
+
         existing_ids = {r.id for r in db.query(RefMotif.id).all()}
         for (name, motif_number, category, chapters, source) in MOTIFS:
             base = f"motif-{_slug(name)}"

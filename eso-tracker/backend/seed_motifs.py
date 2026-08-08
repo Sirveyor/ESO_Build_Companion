@@ -144,7 +144,7 @@ MOTIFS = [
     ('Skinchanger Style', 31, 'Event', True, 'Chapters were originally found in New Life Gift Boxes, which were rewards for event-related quests during the New Life Festival event starting in 2016.'),
     ('Hollowjack Style', 42, 'Event', True, 'Chapters were originally found in Plunder Skulls, which dropped from various bosses during the Witches Festival event.'),
     ('Worm Cult Style', 60, 'Event', True, 'Chapters were originally found in Anniversary Jubilee Gift Boxes, which were quest rewards for completing daily and weekly quests during the Four Year Anniversary event starting in 2018.'),
-    ('Dremora Style', 63, 'Event', False, 'Found in Dremora Plunder Skulls, which dropped from various bosses during the Witches Festival event starting in 2018.'),
+    ('Dremora Style', 63, 'Event', True, 'Chapters found in Dremora Plunder Skulls, which dropped from various bosses during the Witches Festival event starting in 2018.'),
 
     # --- PvP/Imperial City ---
     ('Xivkyn Style', 17, 'PvP/Imperial City', True, 'Chapters (or rarely the entire book) can be found in Trophy Vaults in the Imperial City. These vaults can only be accessed by collecting Key Fragments which drop from enemies in the Sewers or City Districts.'),
