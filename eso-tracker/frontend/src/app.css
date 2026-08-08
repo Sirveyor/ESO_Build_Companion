@@ -32,6 +32,21 @@ html, body {
   min-height: 100vh;
 }
 
+/* ── Scrollbars ─────────────────────────────────────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-2) var(--bg-deep);
+}
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg-deep); }
+::-webkit-scrollbar-thumb {
+  background: var(--surface-2);
+  border-radius: 99px;
+  border: 2px solid var(--bg-deep);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--gold-dim); }
+::-webkit-scrollbar-corner { background: var(--bg-deep); }
+
 /* ── Typography ─────────────────────────────────────────────────────────────── */
 h1 { font-size: 1.6rem; font-weight: 600; color: var(--gold); margin-bottom: .75rem; }
 h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: .5rem; }
