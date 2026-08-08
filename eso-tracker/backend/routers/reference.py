@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from dependencies import get_db
-from models.reference import RefEnchantment, RefTrait, RefMundusStone, RefSkillLine, RefSkill, RefResearchTrait, RefFood, RefWeaponType, RefMotif
-from schemas import RefEnchantmentSchema, RefTraitSchema, RefMundusStoneSchema, RefSkillLineSchema, RefSkillSchema, RefResearchTraitSchema, RefFoodSchema, RefWeaponTypeSchema, RefMotifSchema
+from models.reference import RefEnchantment, RefTrait, RefMundusStone, RefSkillLine, RefSkill, RefResearchTrait, RefFood, RefWeaponType, RefMotif, RefFragmentSet
+from schemas import RefEnchantmentSchema, RefTraitSchema, RefMundusStoneSchema, RefSkillLineSchema, RefSkillSchema, RefResearchTraitSchema, RefFoodSchema, RefWeaponTypeSchema, RefMotifSchema, RefFragmentSetSchema
 
 router = APIRouter(prefix="/reference", tags=["Reference"])
 
@@ -75,3 +75,11 @@ def get_ref_motifs(category: str = None, db: Session = Depends(get_db)):
     if category:
         q = q.filter(RefMotif.category == category)
     return q.order_by(RefMotif.category, RefMotif.motif_number, RefMotif.name).all()
+
+
+@router.get("/fragments", response_model=list[RefFragmentSetSchema])
+def get_ref_fragments(category: str = None, db: Session = Depends(get_db)):
+    q = db.query(RefFragmentSet)
+    if category:
+        q = q.filter(RefFragmentSet.category == category)
+    return q.order_by(RefFragmentSet.category, RefFragmentSet.name).all()

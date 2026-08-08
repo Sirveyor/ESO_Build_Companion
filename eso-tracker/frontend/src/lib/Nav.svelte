@@ -63,6 +63,10 @@
                 onclick={() => navigate('motifs')}>
           Motifs
         </button>
+        <button class:active={page === 'fragments'}
+                onclick={() => navigate('fragments')}>
+          Fragments
+        </button>
       {/if}
     </nav>
 

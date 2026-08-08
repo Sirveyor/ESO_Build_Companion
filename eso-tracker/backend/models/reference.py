@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy import Column, Integer, String, Text, ForeignKey
+from sqlalchemy.orm import relationship
 from database import Base
 
 
@@ -89,6 +90,25 @@ class RefMotif(Base):
     category     = Column(String, nullable=False)  # Racial | Crafted | Crown Store | Dungeon/Trial | Overland | Event | PvP/Imperial City
     chapter      = Column(String)                  # None for single-book motifs; chapter name otherwise
     source       = Column(Text)                    # How/where the book or chapter is obtained
+
+
+class RefFragmentSet(Base):
+    __tablename__ = "ref_fragment_sets"
+    id       = Column(String, primary_key=True)
+    name     = Column(String, nullable=False)  # Collectible name, e.g. "Dwarven Theodolite"
+    category = Column(String, nullable=False)  # Public Dungeon | Event | Prologue Quest | Tales of Tribute | Infinite Archive | Skill Style
+
+    items = relationship("RefFragmentItem", back_populates="fragment_set", cascade="all, delete-orphan")
+
+
+class RefFragmentItem(Base):
+    __tablename__ = "ref_fragment_items"
+    id      = Column(String, primary_key=True)
+    set_id  = Column(String, ForeignKey("ref_fragment_sets.id"), nullable=False)
+    name    = Column(String, nullable=False)  # Individual fragment/piece name
+    source  = Column(Text)                    # Where/how this piece is obtained
+
+    fragment_set = relationship("RefFragmentSet", back_populates="items")
 
 
 class RefResearchTrait(Base):

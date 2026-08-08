@@ -14,6 +14,7 @@ import models.build_skills     # noqa: F401
 import models.reference        # noqa: F401
 import models.recipe           # noqa: F401
 import models.motif            # noqa: F401
+import models.fragment         # noqa: F401
 
 
 def init_db():
@@ -28,6 +29,7 @@ def init_db():
     _seed_drinks()
     _seed_weapon_types()
     _seed_motifs()
+    _seed_fragments()
 
 
 def _migrate():
@@ -416,6 +418,30 @@ def _seed_motifs():
                 db.add(RefMotif(
                     id=mid, name=name, motif_number=motif_number,
                     category=category, chapter=chapter, source=source,
+                ))
+        db.commit()
+
+
+def _seed_fragments():
+    """Populate ref_fragment_sets/items from FRAGMENT_SETS. Skips sets that already exist by name."""
+    import re
+    from sqlalchemy.orm import Session
+    from models.reference import RefFragmentSet, RefFragmentItem
+    from seed_fragments import FRAGMENT_SETS
+
+    def _slug(s):
+        return re.sub(r"[^a-z0-9]+", "-", s.lower()).strip("-")
+
+    with Session(engine) as db:
+        existing_names = {r.name for r in db.query(RefFragmentSet.name).all()}
+        for (set_name, category, items) in FRAGMENT_SETS:
+            if set_name in existing_names:
+                continue
+            set_id = f"frag-{_slug(set_name)}"
+            db.add(RefFragmentSet(id=set_id, name=set_name, category=category))
+            for i, (item_name, source) in enumerate(items):
+                db.add(RefFragmentItem(
+                    id=f"{set_id}-{i}", set_id=set_id, name=item_name, source=source,
                 ))
         db.commit()
 

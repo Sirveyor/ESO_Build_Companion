@@ -10,9 +10,10 @@
   import ReferenceLibrary from './lib/ReferenceLibrary.svelte'
   import RecipeTracker    from './lib/RecipeTracker.svelte'
   import MotifTracker     from './lib/MotifTracker.svelte'
+  import FragmentTracker  from './lib/FragmentTracker.svelte'
 
   // ── Router state ─────────────────────────────────────────────────────────
-  // page: 'home' | 'characters' | 'character' | 'build' | 'gear-sets' | 'compare' | 'scraper' | 'reference' | 'recipes' | 'motifs'
+  // page: 'home' | 'characters' | 'character' | 'build' | 'gear-sets' | 'compare' | 'scraper' | 'reference' | 'recipes' | 'motifs' | 'fragments'
   let page      = $state('home')
   let curUser   = $state(null)
   let curChar   = $state(null)
@@ -72,6 +73,9 @@
 
   {:else if page === 'motifs'}
     <MotifTracker character={curChar} />
+
+  {:else if page === 'fragments'}
+    <FragmentTracker character={curChar} />
   {/if}
 </main>
 

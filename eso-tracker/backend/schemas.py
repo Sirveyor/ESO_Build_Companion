@@ -259,6 +259,33 @@ class LearnedMotifSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class RefFragmentItemSchema(BaseModel):
+    id: str
+    set_id: str
+    name: str
+    source: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class RefFragmentSetSchema(BaseModel):
+    id: str
+    name: str
+    category: str
+    items: list[RefFragmentItemSchema] = []
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class LearnedFragmentSchema(BaseModel):
+    id: str
+    character_id: str
+    fragment_id: str
+    learned_at: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class RefResearchTraitSchema(BaseModel):
     id: str
     item_type: str
