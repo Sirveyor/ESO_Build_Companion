@@ -174,6 +174,23 @@
   .crumb-current { color: var(--text); }
   .sep { color: var(--border); }
 
+  /* Tablet: too many nav buttons to fit on one line alongside brand + user-chip.
+     Wrap nav onto its own full-width row and let it scroll horizontally instead
+     of squeezing every button. */
+  @media (max-width: 900px) {
+    header { flex-wrap: wrap; row-gap: .5rem; }
+    .brand     { order: 1; }
+    .user-chip { order: 2; }
+    nav {
+      order: 3;
+      flex-basis: 100%;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: .2rem;
+    }
+    nav button { flex-shrink: 0; }
+  }
+
   @media (max-width: 640px) {
     header { padding: .6rem 1rem; gap: .75rem; }
     .brand { font-size: .9rem; }
