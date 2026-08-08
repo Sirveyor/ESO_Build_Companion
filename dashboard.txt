@@ -1,0 +1,201 @@
+================================================================================
+ESO BUILD COMPANION — REBUILD FROM SCRATCH
+================================================================================
+A from-scratch guide to recreate this app: a FastAPI + SQLite backend and a
+Svelte 5 + Vite frontend, run locally and reachable by any device on the LAN.
+
+--------------------------------------------------------------------------------
+1. WHAT YOU'RE BUILDING
+--------------------------------------------------------------------------------
+- Backend:  Python, FastAPI, SQLAlchemy ORM, SQLite file database, uvicorn
+- Frontend: Svelte 5 (runes API), Vite dev server, plain CSS (no framework)
+- No auth/login. No external services. Single-process backend, single .db file.
+- Backend listens on 0.0.0.0:8000 so any device on the LAN can reach it; the
+  frontend's api.js points at `http://<page-hostname>:8000` automatically, so
+  it works both from localhost and from another device on the network.
+
+--------------------------------------------------------------------------------
+2. PREREQUISITES
+--------------------------------------------------------------------------------
+- Python 3.11+ (Windows: install from python.org, ensure "Add to PATH")
+- Node.js 20+ and npm
+- git
+
+--------------------------------------------------------------------------------
+3. PROJECT LAYOUT
+--------------------------------------------------------------------------------
+ESO_Build_Companion/
+  .venv/                        <- Python venv for the WHOLE project (root level)
+  eso-tracker/
+    backend/
+      main.py                   <- FastAPI app, CORS, router registration, /version
+      database.py                <- SQLAlchemy engine/session, reads ESO_DB_PATH from .env
+      dependencies.py            <- get_db() FastAPI dependency
+      init_db.py                 <- create_all() + all _seed_*() functions, called on startup
+      schemas.py                 <- every Pydantic response/request model, in one file
+      scraper.py                 <- UESP.net HTML scraper used by routers/scraper.py
+      requirements.txt
+      .env                       <- NOT in git; optional ESO_DB_PATH override
+      data/eso.db                <- NOT in git; created automatically on first run
+      models/                    <- one SQLAlchemy model file per table/domain
+        user.py, character.py, build.py, gear_item.py, gear_set.py, skill.py,
+        trait.py, source_link.py, links.py, champion_points.py, build_skills.py,
+        reference.py             <- all read-only "ref_*" lookup tables live here
+                                     (RefEnchantment, RefTrait, RefMundusStone,
+                                     RefSkillLine, RefSkill, RefWeaponType,
+                                     RefFood, RefResearchTrait, RefMotif)
+        recipe.py                <- LearnedRecipe (per-character join to ref_food)
+        motif.py                 <- LearnedMotif  (per-character join to ref_motifs)
+      routers/                   <- one FastAPI router per resource, mounted in main.py
+        users.py, characters.py, builds.py, gear.py, gear_sets.py, skills.py,
+        traits.py, sources.py, scraper.py, reference.py, recipes.py, motifs.py
+      seed_*.py                  <- static ESO game data as plain Python literals,
+                                     imported and inserted by init_db.py's _seed_*()
+                                     functions (gear_sets, skill_lines, skills,
+                                     research_traits, food, drinks, weapon_types,
+                                     motifs)
+    frontend/
+      src/
+        App.svelte                <- tiny router: page state + component switch
+        Nav.svelte                 <- top nav bar + breadcrumbs
+        api.js                     <- every backend call, one object of functions
+        app.css                    <- global theme (CSS custom properties, dark by default)
+        lib/                       <- one Svelte component per screen/feature
+          UserSelect, CharacterList, BuildList, GearChecklist, GearSetBrowser,
+          SetComparison, Scraper, ReferenceLibrary, RecipeTracker, MotifTracker,
+          ChampionPointsEditor, SkillBar, TraitTracker
+      package.json, vite.config.js, svelte.config.js, jsconfig.json
+    backend_start.bat            <- convenience launcher (see section 6)
+    frontend_start.bat
+  documents/                     <- source spreadsheets used to seed game data (not app code)
+
+--------------------------------------------------------------------------------
+4. BACKEND SETUP
+--------------------------------------------------------------------------------
+From the project root (ESO_Build_Companion/):
+
+    python -m venv .venv
+    .venv\Scripts\activate                     (PowerShell: .venv\Scripts\Activate.ps1)
+    pip install -r eso-tracker\backend\requirements.txt
+
+requirements.txt installs: fastapi, sqlalchemy, "uvicorn[standard]",
+python-dotenv, httpx, beautifulsoup4.
+
+Optional: create eso-tracker/backend/.env to override where the SQLite file
+lives (defaults to eso-tracker/backend/data/eso.db if omitted):
+
+    ESO_DB_PATH=C:\path\to\wherever\eso.db
+
+Do NOT create a venv *inside* eso-tracker/backend/ — keep the venv at the
+project root only. (A stray venv was once created directly inside
+eso-tracker/backend/ by accident; its auto-generated .gitignore contains a
+bare "*" that silently hides any new file dropped in that folder from git.
+If you ever see Include/, Lib/, Scripts/, pyvenv.cfg sitting next to main.py,
+delete them and remove eso-tracker/backend/.gitignore.)
+
+--------------------------------------------------------------------------------
+5. FRONTEND SETUP
+--------------------------------------------------------------------------------
+    cd eso-tracker\frontend
+    npm install
+
+--------------------------------------------------------------------------------
+6. RUNNING IT (two terminals)
+--------------------------------------------------------------------------------
+Terminal 1 — backend (from eso-tracker/backend, with the root venv activated):
+
+    uvicorn main:app --reload --host 0.0.0.0 --port 8000
+
+  (backend_start.bat does exactly this using ..\..\.venv\Scripts\uvicorn.exe)
+
+  On startup, main.py calls init_db(), which:
+    - creates every table via Base.metadata.create_all() if the .db file is new
+    - runs a small set of idempotent ALTER TABLE migrations for older DBs
+    - runs every _seed_*() function, each of which is written to skip rows
+      that already exist (by id, or by an early "if count() > 0: return"
+      guard) — so it's always safe to restart the server; it never
+      duplicates data or wipes anything you've entered.
+
+Terminal 2 — frontend:
+
+    cd eso-tracker\frontend
+    npm run dev
+
+  (frontend_start.bat does exactly this.)
+
+Then open the URL Vite prints (typically http://localhost:5173). From another
+device on the same LAN, use this machine's LAN IP instead of localhost for
+both the frontend and http://<LAN-IP>:8000/version to sanity-check the API.
+
+--------------------------------------------------------------------------------
+7. THE DATA MODEL PATTERN (read this before adding a new feature)
+--------------------------------------------------------------------------------
+Every "trackable game data" feature in this app follows the same shape:
+
+  a) A read-only reference table (ref_*) holding static ESO game data —
+     lives in models/reference.py, populated by a seed_<thing>.py file of
+     plain Python tuples/lists, inserted by a _seed_<thing>() function in
+     init_db.py. These never change at runtime from the UI.
+
+  b) A per-character "learned"/"obtained" join table (e.g. learned_recipes,
+     learned_motifs, traits) with its own tiny model file, FK'd to both
+     characters.id and the ref_* table's id. This is what the UI actually
+     writes to.
+
+  c) A schemas.py entry for both (RefXSchema, LearnedXSchema).
+
+  d) A router: GET on the ref_* table (optionally filtered by a query param
+     like category/slot_type), and GET/POST/DELETE on the learned_* table
+     scoped by character_id. See routers/recipes.py and routers/motifs.py —
+     they are near-identical ~30-line files; copy one when adding a new
+     trackable collection.
+
+  e) A frontend page in lib/ that: fetches both lists on mount, derives a
+     Set of learned IDs, renders filter/search/sort controls plus a
+     category-pill summary row, and toggles learned state by POST/DELETE on
+     row click. RecipeTracker.svelte and MotifTracker.svelte are the
+     reference implementations — copy one.
+
+  f) Wire the new page into Nav.svelte (nav button) and App.svelte (route
+     branch + component import).
+
+--------------------------------------------------------------------------------
+8. VERSION FILE
+--------------------------------------------------------------------------------
+eso-tracker/VERSION is a single line (e.g. "1.1.0") read by GET /version and
+shown in the nav bar. Bump it by hand when you want the UI to reflect a new
+release.
+
+--------------------------------------------------------------------------------
+9. GOING BEYOND LAN (public hosting)
+--------------------------------------------------------------------------------
+This app ships with no authentication — treat that as a hard blocker before
+exposing it beyond your LAN. If you do want to host it publicly:
+
+  - Frontend: `npm run build` in eso-tracker/frontend produces a static
+    dist/ folder — serve it from any static host / nginx.
+  - Backend: run uvicorn behind a process manager (systemd service, or a
+    host like Render.com) with `--host 0.0.0.0 --port $PORT`.
+  - Change frontend/src/api.js's BASE constant — it currently hardcodes
+    `http://${window.location.hostname}:8000`, which only works when the
+    frontend and backend share a hostname with the backend on port 8000.
+    For a real domain, point it at wherever the backend actually runs
+    (e.g. reverse-proxied at /api, or a separate backend host's URL).
+  - Add authentication (HTTP basic auth at the reverse proxy is the
+    minimum-effort option) before making the URL public.
+  - Full step-by-step VPS/nginx/systemd/certbot instructions for this
+    project's original Bluehost target live in "Deploy Instructions.txt"
+    at the repo root — follow that once the app itself is rebuilt and
+    working locally.
+
+--------------------------------------------------------------------------------
+10. QUICK SANITY CHECK AFTER SETUP
+--------------------------------------------------------------------------------
+    curl http://127.0.0.1:8000/version
+    curl http://127.0.0.1:8000/reference/food
+    curl http://127.0.0.1:8000/reference/motifs
+
+All three should return JSON. If the first works but the other two are empty
+arrays, the backend started but init_db()'s seeding didn't run — check the
+uvicorn console output for an exception during startup.
+================================================================================
