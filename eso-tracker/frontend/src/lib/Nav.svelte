@@ -28,7 +28,19 @@
   <div class="brand" role="button" tabindex="0"
        onclick={() => navigate('home')}
        onkeydown={(e) => e.key === 'Enter' && navigate('home')}>
-    ⚔ ESO Build Companion
+    <svg class="brand-icon" viewBox="0 0 48 48" aria-hidden="true">
+      <circle cx="24" cy="24" r="22" fill="#14101f" stroke="#2a2a42" stroke-width="1.5"/>
+      <polygon points="9,25 20,22.5 20,29.5" fill="#c9a84c"/>
+      <rect x="18" y="21" width="19" height="8" rx="1.5" fill="#c9a84c"/>
+      <rect x="23.5" y="29" width="8" height="5" fill="#c9a84c"/>
+      <rect x="17" y="34" width="20" height="5" rx="1.5" fill="#c9a84c"/>
+      <rect x="14" y="39" width="26" height="3" rx="1" fill="#7a6530"/>
+      <g transform="translate(48,0) scale(-1,1) translate(30 20) rotate(35)">
+        <rect x="-1.6" y="-24" width="3.2" height="17" rx="1" fill="#8a6a3f"/>
+        <rect x="-6.5" y="-7" width="13" height="7" rx="1.5" fill="#c9a84c" stroke="#7a6530" stroke-width="0.6"/>
+      </g>
+    </svg>
+    ESO Build Companion
     {#if version}<span class="version">v{version}</span>{/if}
   </div>
 
@@ -111,11 +123,20 @@
   }
 
   .brand {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
     font-size: 1.05rem;
     font-weight: 700;
     color: var(--gold);
     cursor: pointer;
     white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .brand-icon {
+    width: 22px;
+    height: 22px;
     flex-shrink: 0;
   }
   .brand:hover { opacity: .8; }
