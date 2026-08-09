@@ -1,5 +1,17 @@
-// Points at port 8000 on whatever host served this page, so LAN devices work automatically.
-const BASE = `http://${window.location.hostname}:8000`
+// Points at a backend port on whatever host served this page, so LAN devices work automatically.
+// Defaults to 8000, but can be overridden per-visitor via ?api_port=8001 (e.g. for testers who
+// each run against their own isolated backend instance/database) -- the choice is remembered in
+// localStorage so it only needs to be set once per browser.
+const API_PORT = (() => {
+  const fromUrl = new URLSearchParams(window.location.search).get('api_port')
+  if (fromUrl) {
+    localStorage.setItem('eso_api_port', fromUrl)
+    return fromUrl
+  }
+  return localStorage.getItem('eso_api_port') || '8000'
+})()
+
+const BASE = `http://${window.location.hostname}:${API_PORT}`
 const HEADERS = { 'Content-Type': 'application/json' }
 
 async function req(method, path, body) {
