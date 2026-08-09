@@ -115,9 +115,4 @@ export const api = {
   getLearnedFragments: (charId) => req('GET',    `/fragments/${charId ? `?character_id=${charId}` : ''}`),
   learnFragment:       (data)   => req('POST',   '/fragments/', data),
   unlearnFragment:     (id)     => req('DELETE', `/fragments/${id}`),
-
-  // UESP Scraper
-  scraperSearch:  (q)              => req('GET',    `/scraper/search?q=${encodeURIComponent(q)}`),
-  scraperPreview: (url)            => req('POST',   '/scraper/preview', { url }),
-  scraperImport:  (url, overwrite) => req('POST',   '/scraper/import',  { url, overwrite: overwrite ?? false }),
 }

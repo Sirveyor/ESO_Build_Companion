@@ -7,14 +7,13 @@
   import GearChecklist from './lib/GearChecklist.svelte'
   import GearSetBrowser from './lib/GearSetBrowser.svelte'
   import SetComparison  from './lib/SetComparison.svelte'
-  import Scraper          from './lib/Scraper.svelte'
   import ReferenceLibrary from './lib/ReferenceLibrary.svelte'
   import RecipeTracker    from './lib/RecipeTracker.svelte'
   import MotifTracker     from './lib/MotifTracker.svelte'
   import FragmentTracker  from './lib/FragmentTracker.svelte'
 
   // ── Router state ─────────────────────────────────────────────────────────
-  // page: 'home' | 'characters' | 'character' | 'build' | 'gear-sets' | 'compare' | 'scraper' | 'reference' | 'recipes' | 'motifs' | 'fragments'
+  // page: 'home' | 'characters' | 'character' | 'build' | 'gear-sets' | 'compare' | 'reference' | 'recipes' | 'motifs' | 'fragments'
   let page      = $state('home')
   let curUser   = $state(null)
   let curChar   = $state(null)
@@ -57,11 +56,6 @@
       selector: '[data-tour="nav-compare"]',
       title: 'Compare',
       text: 'Put two sets side by side to decide which fits your build.',
-    },
-    {
-      selector: '[data-tour="nav-scraper"]',
-      title: 'Import',
-      text: 'Pull gear data in automatically instead of typing it by hand.',
     },
     {
       selector: '[data-tour="nav-reference"]',
@@ -180,9 +174,6 @@
 
   {:else if page === 'compare'}
     <SetComparison />
-
-  {:else if page === 'scraper'}
-    <Scraper />
 
   {:else if page === 'reference'}
     <ReferenceLibrary />

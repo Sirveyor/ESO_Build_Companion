@@ -33,7 +33,6 @@ ESO_Build_Companion/
       dependencies.py            <- get_db() FastAPI dependency
       init_db.py                 <- create_all() + all _seed_*() functions, called on startup
       schemas.py                 <- every Pydantic response/request model, in one file
-      scraper.py                 <- UESP.net HTML scraper used by routers/scraper.py
       requirements.txt
       .env                       <- NOT in git; optional ESO_DB_PATH override
       data/eso.db                <- NOT in git; created automatically on first run
@@ -48,7 +47,7 @@ ESO_Build_Companion/
         motif.py                 <- LearnedMotif  (per-character join to ref_motifs)
       routers/                   <- one FastAPI router per resource, mounted in main.py
         users.py, characters.py, builds.py, gear.py, gear_sets.py, skills.py,
-        traits.py, sources.py, scraper.py, reference.py, recipes.py, motifs.py
+        traits.py, sources.py, reference.py, recipes.py, motifs.py
       seed_*.py                  <- static ESO game data as plain Python literals,
                                      imported and inserted by init_db.py's _seed_*()
                                      functions (gear_sets, skill_lines, skills,
@@ -62,7 +61,7 @@ ESO_Build_Companion/
         app.css                    <- global theme (CSS custom properties, dark by default)
         lib/                       <- one Svelte component per screen/feature
           UserSelect, CharacterList, BuildList, GearChecklist, GearSetBrowser,
-          SetComparison, Scraper, ReferenceLibrary, RecipeTracker, MotifTracker,
+          SetComparison, ReferenceLibrary, RecipeTracker, MotifTracker,
           ChampionPointsEditor, SkillBar, TraitTracker
       package.json, vite.config.js, svelte.config.js, jsconfig.json
     backend_start.bat            <- convenience launcher (see section 6)
@@ -79,7 +78,7 @@ From the project root (ESO_Build_Companion/):
     pip install -r eso-tracker\backend\requirements.txt
 
 requirements.txt installs: fastapi, sqlalchemy, "uvicorn[standard]",
-python-dotenv, httpx, beautifulsoup4.
+python-dotenv.
 
 Optional: create eso-tracker/backend/.env to override where the SQLite file
 lives (defaults to eso-tracker/backend/data/eso.db if omitted):

@@ -61,11 +61,6 @@
               onclick={() => navigate('compare')}>
         Compare
       </button>
-      <button data-tour="nav-scraper"
-              class:active={page === 'scraper'}
-              onclick={() => navigate('scraper')}>
-        Import
-      </button>
       <button data-tour="nav-reference"
               class:active={page === 'reference'}
               onclick={() => navigate('reference')}>

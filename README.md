@@ -1,5 +1,6 @@
 This is a vibe coding project. Except for a skeleton FastApi app, all the coding was done by Claude Code v2.1.226 Sonnet 5.
 
+
 # ESO Build Companion
 
 Web app to keep track of Elder Scrolls On-Line character builds.
@@ -21,5 +22,4 @@ Built with FastAPI + SQLite (backend) and Svelte 5 (frontend). Runs on a local P
 - **Gear Set Browser** — Browse and manage your gear set library with bonus details
 - **Set Comparison** — Compare up to four gear sets side by side
 - **Reference Library** — Look up enchantments, traits, and mundus stones in one place
-- **UESP Import** — Search and import gear set data directly from [UESP.net](https://en.uesp.net)
 - **Guided Onboarding** — Spotlighted walkthroughs on first login, first character created, and first visit to a character's build screen, shown once per profile
