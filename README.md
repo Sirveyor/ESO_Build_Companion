@@ -1,3 +1,5 @@
+This is a vibe coding project. Except for a skeleton FastApi app, all the coding was done by Claude Code v2.1.226 Sonnet 5.
+
 # ESO Build Companion
 
 Web app to keep track of Elder Scrolls On-Line character builds.
