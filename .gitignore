@@ -26,3 +26,14 @@ desktop.ini
 
 # ── IDE task-management state (Qodo) ─────────────────────────────────────────
 .qodo/
+documents/tester.txt
+documents/tester3.txt
+documents/tester2.txt
+documents/tester1.txt
+eso-tracker/backend_start_tester1.bat
+eso-tracker/backend_start_tester1.bat - Shortcut.lnk
+eso-tracker/backend_start_tester2.bat - Shortcut.lnk
+eso-tracker/backend_start_tester3.bat
+eso-tracker/backend_start_tester3.bat - Shortcut.lnk
+eso-tracker/backend_start.bat - Shortcut.lnk
+
