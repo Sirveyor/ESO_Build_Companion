@@ -1,6 +1,7 @@
 <script>
   import Nav           from './lib/Nav.svelte'
   import UserSelect    from './lib/UserSelect.svelte'
+  import OnboardingTour from './lib/OnboardingTour.svelte'
   import CharacterList from './lib/CharacterList.svelte'
   import BuildList     from './lib/BuildList.svelte'
   import GearChecklist from './lib/GearChecklist.svelte'
@@ -18,6 +19,7 @@
   let curUser   = $state(null)
   let curChar   = $state(null)
   let curBuild  = $state(null)
+  let showTour  = $state(false)
 
   function navigate(to, ctx = {}) {
     page = to
@@ -25,6 +27,57 @@
     if ('character' in ctx) curChar  = ctx.character
     if ('build'     in ctx) curBuild = ctx.build
   }
+
+  function selectUser(u) {
+    navigate('characters', { user: u })
+    if (!localStorage.getItem(`eso_tour_seen:${u.id}`)) showTour = true
+  }
+
+  function finishTour() {
+    if (curUser) localStorage.setItem(`eso_tour_seen:${curUser.id}`, '1')
+    showTour = false
+  }
+
+  const tourSteps = $derived([
+    {
+      title: `Welcome, ${curUser?.display_name || curUser?.name || 'adventurer'}!`,
+      text: 'A quick look around — takes about 30 seconds.',
+    },
+    {
+      selector: '[data-tour="nav-characters"]',
+      title: 'Characters',
+      text: 'Your characters live here. Pick one to manage its builds and gear.',
+    },
+    {
+      selector: '[data-tour="nav-gear-sets"]',
+      title: 'Gear Sets',
+      text: 'Browse every ESO gear set and its bonuses.',
+    },
+    {
+      selector: '[data-tour="nav-compare"]',
+      title: 'Compare',
+      text: 'Put two sets side by side to decide which fits your build.',
+    },
+    {
+      selector: '[data-tour="nav-scraper"]',
+      title: 'Import',
+      text: 'Pull gear data in automatically instead of typing it by hand.',
+    },
+    {
+      selector: '[data-tour="nav-reference"]',
+      title: 'Reference',
+      text: 'A quick-lookup library for traits, motifs, and more.',
+    },
+    {
+      selector: '[data-tour="user-chip"]',
+      title: 'Switching profiles',
+      text: 'Come back here anytime to switch to the other profile.',
+    },
+    {
+      title: "That's it!",
+      text: 'Have fun gearing up.',
+    },
+  ])
 </script>
 
 <div class="app-watermark" aria-hidden="true">
@@ -98,7 +151,7 @@
 <main>
   {#if page === 'home'}
     <UserSelect
-      onselect={(u) => navigate('characters', { user: u })}
+      onselect={selectUser}
     />
 
   {:else if page === 'characters'}
@@ -144,6 +197,10 @@
     <FragmentTracker character={curChar} />
   {/if}
 </main>
+
+{#if showTour}
+  <OnboardingTour steps={tourSteps} onfinish={finishTour} />
+{/if}
 
 <style>
   main { flex: 1; position: relative; z-index: 1; }

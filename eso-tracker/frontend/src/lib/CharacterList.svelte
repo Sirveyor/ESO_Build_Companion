@@ -1,15 +1,42 @@
 <script>
   import { api } from '../api.js'
   import { ESO_CLASSES, ESO_RACES, ESO_ROLES, ESO_ALLIANCES, ALLIANCE_COLORS, CLASS_COLORS, ROLE_ICONS } from './constants.js'
+  import OnboardingTour from './OnboardingTour.svelte'
 
   let { user, onselect, onback } = $props()
 
-  let characters = $state([])
-  let loading    = $state(true)
-  let error      = $state('')
-  let showForm   = $state(false)
-  let saving     = $state(false)
-  let editId     = $state(null)
+  let characters   = $state([])
+  let loading      = $state(true)
+  let error        = $state('')
+  let showForm     = $state(false)
+  let saving       = $state(false)
+  let editId       = $state(null)
+  let showCharTour = $state(false)
+  let newCharId    = $state(null)
+
+  const newChar = $derived(characters.find(c => c.id === newCharId))
+  const charTourSteps = $derived([
+    {
+      title: `${newChar?.name ?? 'Your character'} is on the roster!`,
+      text: 'A couple of quick pointers.',
+    },
+    {
+      selector: '[data-tour="new-char-card"]',
+      title: 'Your character',
+      text: 'Click the card to manage builds and track gear. Hover it for edit and delete options.',
+    },
+    {
+      selector: '[data-tour="new-char-btn"]',
+      title: 'Add more',
+      text: 'Add as many characters as you like from here.',
+    },
+  ])
+
+  function finishCharTour() {
+    localStorage.setItem(`eso_char_tour_seen:${user.id}`, '1')
+    showCharTour = false
+    newCharId = null
+  }
 
   let form = $state(blankForm())
 
@@ -53,6 +80,8 @@
       } else {
         const created = await api.createCharacter({ ...payload, id: crypto.randomUUID() })
         characters = [...characters, created]
+        newCharId = created.id
+        if (!localStorage.getItem(`eso_char_tour_seen:${user.id}`)) showCharTour = true
       }
       form = blankForm(); showForm = false
     } catch (e) {
@@ -96,7 +125,8 @@
       <button class="btn-ghost back-btn" onclick={onback}>‹ Profiles</button>
       <h1>{user.display_name || user.name}'s Characters</h1>
     </div>
-    <button class="btn-primary" onclick={() => { showForm = !showForm; if (!showForm) cancelForm() }}>
+    <button class="btn-primary" data-tour="new-char-btn"
+            onclick={() => { showForm = !showForm; if (!showForm) cancelForm() }}>
       {showForm && !editId ? 'Cancel' : '+ New Character'}
     </button>
   </div>
@@ -183,7 +213,9 @@
   {:else}
     <div class="grid-2">
       {#each characters as c (c.id)}
-        <div class="card card-clickable char-card" onclick={() => onselect(c)}>
+        <div class="card card-clickable char-card"
+             data-tour={c.id === newCharId ? 'new-char-card' : undefined}
+             onclick={() => onselect(c)}>
           {#if c.custom_portrait}
             <img class="char-avatar" src={c.custom_portrait} alt="{c.name} portrait" />
           {:else}
@@ -213,6 +245,10 @@
     </div>
   {/if}
 </div>
+
+{#if showCharTour}
+  <OnboardingTour steps={charTourSteps} onfinish={finishCharTour} />
+{/if}
 
 <style>
   .back-btn { margin-bottom: .25rem; font-size: .85rem; }

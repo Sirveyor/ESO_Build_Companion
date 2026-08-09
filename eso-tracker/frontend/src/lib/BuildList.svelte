@@ -1,18 +1,46 @@
 <script>
   import { api } from '../api.js'
   import { ESO_CLASSES, ESO_ROLES, ROLE_ICONS, ALLIANCE_COLORS } from './constants.js'
+  import OnboardingTour from './OnboardingTour.svelte'
 
   let { character, onselect, onback } = $props()
 
-  let builds       = $state([])
-  let completions  = $state({})
-  let loading      = $state(true)
-  let error        = $state('')
-  let showForm     = $state(false)
-  let saving       = $state(false)
-  let editId       = $state(null)
-  let mundusStones = $state([])
-  let refFood      = $state([])
+  let builds        = $state([])
+  let completions   = $state({})
+  let loading       = $state(true)
+  let error         = $state('')
+  let showForm      = $state(false)
+  let saving        = $state(false)
+  let editId        = $state(null)
+  let mundusStones  = $state([])
+  let refFood       = $state([])
+  let showBuildTour = $state(false)
+
+  $effect(() => {
+    if (!localStorage.getItem(`eso_build_tour_seen:${character.user_id}`)) showBuildTour = true
+  })
+
+  const buildTourSteps = $derived([
+    {
+      title: `Welcome to ${character.name}'s build board`,
+      text: "Here's what you can do here.",
+    },
+    {
+      selector: '[data-tour="new-build-btn"]',
+      title: 'New Build',
+      text: 'Each build gets its own gear checklist and completion tracker.',
+    },
+    {
+      selector: '[data-tour="back-to-characters"]',
+      title: 'Switch characters',
+      text: 'Come back here anytime to pick a different character.',
+    },
+  ])
+
+  function finishBuildTour() {
+    localStorage.setItem(`eso_build_tour_seen:${character.user_id}`, '1')
+    showBuildTour = false
+  }
 
   let form = $state(blankForm())
 
@@ -137,7 +165,7 @@
 <div class="page">
   <div class="flex-between" style="margin-bottom:1.5rem">
     <div>
-      <button class="btn-ghost back-btn" onclick={onback}>‹ Characters</button>
+      <button class="btn-ghost back-btn" data-tour="back-to-characters" onclick={onback}>‹ Characters</button>
       <h1>{character.name}</h1>
       <div class="char-meta flex" style="margin-top:.25rem">
         <span class="badge">{character.class_name}</span>
@@ -152,7 +180,8 @@
         <span style="color:var(--text-dim);font-size:.85rem">Lv {character.level} · {character.champion_points} CP</span>
       </div>
     </div>
-    <button class="btn-primary" onclick={() => { showForm = !showForm; if (!showForm) cancelForm() }}>
+    <button class="btn-primary" data-tour="new-build-btn"
+            onclick={() => { showForm = !showForm; if (!showForm) cancelForm() }}>
       {showForm && !editId ? 'Cancel' : '+ New Build'}
     </button>
   </div>
@@ -285,6 +314,10 @@
     </div>
   {/if}
 </div>
+
+{#if showBuildTour}
+  <OnboardingTour steps={buildTourSteps} onfinish={finishBuildTour} />
+{/if}
 
 <style>
   .back-btn { margin-bottom: .25rem; font-size: .85rem; }

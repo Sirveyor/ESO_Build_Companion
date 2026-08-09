@@ -46,23 +46,28 @@
 
   {#if curUser}
     <nav>
-      <button class:active={page === 'characters' || page === 'character' || page === 'build'}
+      <button data-tour="nav-characters"
+              class:active={page === 'characters' || page === 'character' || page === 'build'}
               onclick={() => navigate('characters')}>
         Characters
       </button>
-      <button class:active={page === 'gear-sets'}
+      <button data-tour="nav-gear-sets"
+              class:active={page === 'gear-sets'}
               onclick={() => navigate('gear-sets')}>
         Gear Sets
       </button>
-      <button class:active={page === 'compare'}
+      <button data-tour="nav-compare"
+              class:active={page === 'compare'}
               onclick={() => navigate('compare')}>
         Compare
       </button>
-      <button class:active={page === 'scraper'}
+      <button data-tour="nav-scraper"
+              class:active={page === 'scraper'}
               onclick={() => navigate('scraper')}>
         Import
       </button>
-      <button class:active={page === 'reference'}
+      <button data-tour="nav-reference"
+              class:active={page === 'reference'}
               onclick={() => navigate('reference')}>
         Reference
       </button>
@@ -82,7 +87,7 @@
       {/if}
     </nav>
 
-    <div class="user-chip">
+    <div class="user-chip" data-tour="user-chip">
       <span class="user-name">{curUser.display_name || curUser.name}</span>
       <button class="btn-ghost switch" onclick={() => navigate('home')}>Switch</button>
     </div>
