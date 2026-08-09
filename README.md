@@ -23,3 +23,7 @@ Built with FastAPI + SQLite (backend) and Svelte 5 (frontend). Runs on a local P
 - **Set Comparison** — Compare up to four gear sets side by side
 - **Reference Library** — Look up enchantments, traits, and mundus stones in one place
 - **Guided Onboarding** — Spotlighted walkthroughs on first login, first character created, and first visit to a character's build screen, shown once per profile
+
+## License
+
+MIT — see [LICENSE](LICENSE).
