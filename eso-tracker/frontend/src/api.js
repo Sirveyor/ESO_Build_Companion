@@ -89,10 +89,21 @@ export const api = {
   // Build duplicate
   duplicateBuild: (buildId) => req('POST', `/builds/${buildId}/duplicate`),
 
-  // Reference data (read-only game data)
+  // Reference data (game data — editable via Reference Library page)
   getRefEnchantments: (slotType)  => req('GET', `/reference/enchantments${slotType ? `?slot_type=${slotType}` : ''}`),
+  createRefEnchantment: (data)    => req('POST',   '/reference/enchantments', data),
+  updateRefEnchantment: (id, data)=> req('PUT',    `/reference/enchantments/${id}`, data),
+  deleteRefEnchantment: (id)      => req('DELETE', `/reference/enchantments/${id}`),
+
   getRefTraits:       (slotType)  => req('GET', `/reference/traits${slotType ? `?slot_type=${slotType}` : ''}`),
+  createRefTrait: (data)          => req('POST',   '/reference/traits', data),
+  updateRefTrait: (id, data)      => req('PUT',    `/reference/traits/${id}`, data),
+  deleteRefTrait: (id)            => req('DELETE', `/reference/traits/${id}`),
+
   getRefMundusStones: ()          => req('GET', '/reference/mundus-stones'),
+  createRefMundusStone: (data)    => req('POST',   '/reference/mundus-stones', data),
+  updateRefMundusStone: (id, data)=> req('PUT',    `/reference/mundus-stones/${id}`, data),
+  deleteRefMundusStone: (id)      => req('DELETE', `/reference/mundus-stones/${id}`),
   getRefSkillLines:      (className)      => req('GET', `/reference/skill-lines${className ? `?class_name=${encodeURIComponent(className)}` : ''}`),
   getRefSkills:          (skillLineId)    => req('GET', `/reference/skills${skillLineId  ? `?skill_line_id=${encodeURIComponent(skillLineId)}` : ''}`),
   getRefResearchTraits:  (slotCategory)   => req('GET', `/reference/research-traits${slotCategory ? `?slot_category=${encodeURIComponent(slotCategory)}` : ''}`),

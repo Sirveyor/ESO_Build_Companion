@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from dependencies import get_db
 from models.reference import RefEnchantment, RefTrait, RefMundusStone, RefSkillLine, RefSkill, RefResearchTrait, RefFood, RefWeaponType, RefMotif, RefFragmentSet
@@ -15,6 +15,37 @@ def get_ref_enchantments(slot_type: str = None, db: Session = Depends(get_db)):
     return q.order_by(RefEnchantment.slot_type, RefEnchantment.name).all()
 
 
+@router.post("/enchantments", response_model=RefEnchantmentSchema)
+def create_ref_enchantment(item: RefEnchantmentSchema, db: Session = Depends(get_db)):
+    db_item = RefEnchantment(**item.model_dump())
+    db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
+    return db_item
+
+
+@router.put("/enchantments/{item_id}", response_model=RefEnchantmentSchema)
+def update_ref_enchantment(item_id: str, updated: RefEnchantmentSchema, db: Session = Depends(get_db)):
+    item = db.query(RefEnchantment).filter(RefEnchantment.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Enchantment not found")
+    for key, value in updated.model_dump().items():
+        setattr(item, key, value)
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+@router.delete("/enchantments/{item_id}")
+def delete_ref_enchantment(item_id: str, db: Session = Depends(get_db)):
+    item = db.query(RefEnchantment).filter(RefEnchantment.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Enchantment not found")
+    db.delete(item)
+    db.commit()
+    return {"detail": "Enchantment deleted"}
+
+
 @router.get("/traits", response_model=list[RefTraitSchema])
 def get_ref_traits(slot_type: str = None, db: Session = Depends(get_db)):
     q = db.query(RefTrait)
@@ -23,9 +54,71 @@ def get_ref_traits(slot_type: str = None, db: Session = Depends(get_db)):
     return q.order_by(RefTrait.slot_type, RefTrait.name).all()
 
 
+@router.post("/traits", response_model=RefTraitSchema)
+def create_ref_trait(item: RefTraitSchema, db: Session = Depends(get_db)):
+    db_item = RefTrait(**item.model_dump())
+    db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
+    return db_item
+
+
+@router.put("/traits/{item_id}", response_model=RefTraitSchema)
+def update_ref_trait(item_id: str, updated: RefTraitSchema, db: Session = Depends(get_db)):
+    item = db.query(RefTrait).filter(RefTrait.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Trait not found")
+    for key, value in updated.model_dump().items():
+        setattr(item, key, value)
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+@router.delete("/traits/{item_id}")
+def delete_ref_trait(item_id: str, db: Session = Depends(get_db)):
+    item = db.query(RefTrait).filter(RefTrait.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Trait not found")
+    db.delete(item)
+    db.commit()
+    return {"detail": "Trait deleted"}
+
+
 @router.get("/mundus-stones", response_model=list[RefMundusStoneSchema])
 def get_ref_mundus_stones(db: Session = Depends(get_db)):
     return db.query(RefMundusStone).order_by(RefMundusStone.name).all()
+
+
+@router.post("/mundus-stones", response_model=RefMundusStoneSchema)
+def create_ref_mundus_stone(item: RefMundusStoneSchema, db: Session = Depends(get_db)):
+    db_item = RefMundusStone(**item.model_dump())
+    db.add(db_item)
+    db.commit()
+    db.refresh(db_item)
+    return db_item
+
+
+@router.put("/mundus-stones/{item_id}", response_model=RefMundusStoneSchema)
+def update_ref_mundus_stone(item_id: str, updated: RefMundusStoneSchema, db: Session = Depends(get_db)):
+    item = db.query(RefMundusStone).filter(RefMundusStone.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Mundus stone not found")
+    for key, value in updated.model_dump().items():
+        setattr(item, key, value)
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+@router.delete("/mundus-stones/{item_id}")
+def delete_ref_mundus_stone(item_id: str, db: Session = Depends(get_db)):
+    item = db.query(RefMundusStone).filter(RefMundusStone.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Mundus stone not found")
+    db.delete(item)
+    db.commit()
+    return {"detail": "Mundus stone deleted"}
 
 
 @router.get("/skill-lines", response_model=list[RefSkillLineSchema])
