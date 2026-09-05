@@ -1,0 +1,15 @@
+1	One Handed
+1.1	Daggers
+1.2	Maces
+1.3	Swords
+1.4	War Axes
+2	Two Handed
+2.1	Battleaxes
+2.2	Greatswords
+2.3	Mauls
+3	Destruction Staves
+3.1	Lightning Staves
+3.2	Frost Staves
+3.3	Flame Staves
+4	Restoration Staves
+5	Bows

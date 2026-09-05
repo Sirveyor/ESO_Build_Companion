@@ -1,0 +1,151 @@
+
+Step 0 — Check your Bluehost plan type (critical)
+Log into Bluehost → look at your account type:
+
+Shared / Basic / Choice Plus → ❌ Cannot run Python. These plans only support PHP/WordPress. You'd need to upgrade or use a separate backend host.
+VPS or Cloud hosting → ✅ Can run FastAPI. This guide applies.
+If you're on shared hosting, the practical path is: build the frontend on Bluehost, host the backend on a free/cheap service like Railway.app or Render.com — much easier than upgrading.
+
+What you're deploying
+Piece	What it is	Where it goes
+Svelte frontend	Static HTML/CSS/JS files after npm run build	Bluehost public folder
+FastAPI backend	Python process running uvicorn	VPS process or separate host
+SQLite database	A single .db file	Same server as backend
+Path A — You have Bluehost VPS
+Resources you need
+PuTTY (Windows SSH client) — putty.org
+FileZilla (SFTP file transfer) — filezilla-project.org
+Your Bluehost VPS IP address and root password (in Bluehost control panel)
+Step 1 — Connect to your server via SSH
+Open PuTTY
+Host Name: your VPS IP address (found in Bluehost → VPS → Manage)
+Port: 22, Connection type: SSH
+Click Open → log in as root with your VPS password
+Step 2 — Install required software on the server
+Paste these commands one at a time:
+
+
+# Update the server
+apt update && apt upgrade -y
+
+# Install Python, pip, nginx, git
+apt install python3 python3-pip python3-venv nginx git -y
+
+# Install Node.js (for building the frontend)
+curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+apt install nodejs -y
+Step 3 — Upload your project
+Option A (if your code is on GitHub):
+
+
+cd /var/www
+git clone https://github.com/YOUR_USERNAME/ESO_Build_Companion.git
+cd ESO_Build_Companion
+Option B (use FileZilla):
+
+Open FileZilla → connect to your VPS IP on port 22 (SFTP)
+Upload the entire ESO_Build_Companion folder to /var/www/
+Step 4 — Build the frontend
+
+cd /var/www/ESO_Build_Companion/eso-tracker/frontend
+npm install
+npm run build
+# This creates a "dist" folder with the static site files
+Step 5 — Set up the Python backend
+
+cd /var/www/ESO_Build_Companion/eso-tracker/backend
+
+# Create a virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Install dependencies
+pip install fastapi uvicorn sqlalchemy pydantic python-dotenv httpx beautifulsoup4
+Step 6 — Update the frontend API URL for production
+Currently api.js uses window.location.hostname:8000 which works on LAN. On a real domain the backend runs behind nginx on the same domain, so change the base URL:
+
+In eso-tracker/frontend/src/api.js:
+
+
+// Replace this line:
+const BASE = `http://${window.location.hostname}:8000`
+
+// With this (works both locally and in production):
+const BASE = window.location.hostname === 'localhost' || window.location.hostname.startsWith('192.')
+  ? `http://${window.location.hostname}:8000`
+  : '/api'
+Then rebuild: npm run build again from the frontend folder.
+
+Step 7 — Create a systemd service (keeps the backend running)
+
+nano /etc/systemd/system/eso-backend.service
+Paste this content (use Ctrl+X then Y to save):
+
+
+[Unit]
+Description=ESO Build Companion Backend
+After=network.target
+
+[Service]
+User=www-data
+WorkingDirectory=/var/www/ESO_Build_Companion/eso-tracker/backend
+ExecStart=/var/www/ESO_Build_Companion/eso-tracker/backend/.venv/bin/uvicorn main:app --host 127.0.0.1 --port 8000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+# Start and enable it to auto-start on reboot
+systemctl daemon-reload
+systemctl enable eso-backend
+systemctl start eso-backend
+
+# Check it's running
+systemctl status eso-backend
+Step 8 — Configure Nginx
+
+nano /etc/nginx/sites-available/debsnest.com
+Paste:
+
+
+server {
+    listen 80;
+    server_name debsnest.com www.debsnest.com;
+
+    # Serve the Svelte frontend
+    root /var/www/ESO_Build_Companion/eso-tracker/frontend/dist;
+    index index.html;
+
+    # All page routes go to index.html (Svelte handles routing)
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Forward /api/ calls to FastAPI
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+# Enable the site and restart nginx
+ln -s /etc/nginx/sites-available/debsnest.com /etc/nginx/sites-enabled/
+nginx -t          # test config — should say "ok"
+systemctl restart nginx
+Step 9 — Set up free HTTPS (SSL)
+
+apt install certbot python3-certbot-nginx -y
+certbot --nginx -d debsnest.com -d www.debsnest.com
+# Follow the prompts — enter your email, agree to terms
+Certbot automatically renews every 90 days.
+
+Path B — You're on Shared Hosting
+Deploy frontend only to Bluehost, backend to Render.com (free):
+
+Render.com → New Web Service → connect your GitHub repo → set root to eso-tracker/backend → Build command: pip install -r requirements.txt → Start command: uvicorn main:app --host 0.0.0.0 --port $PORT
+Render gives you a URL like https://eso-backend.onrender.com
+Update api.js to point to that URL
+Rebuild the frontend → upload the dist folder to Bluehost's public_html via FileZilla
+Biggest gotcha — the app has no login/password
+Right now anyone who finds the URL can use it. Before deploying publicly you should either add HTTP basic auth in nginx (simple) or add a proper login system. Worth discussing before you go live.
